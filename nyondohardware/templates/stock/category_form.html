@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="mb-6">
+    <h1 class="text-2xl font-bold" style="color: #0a1f44;">{{ title }}</h1>
+    <p class="text-sm text-gray-500 mt-1">
+        <a href="{% url 'stock:category-list' %}" class="hover:underline" style="color: #f97316;">
+            Categories
+        </a>
+        &rsaquo; {{ title }}
+    </p>
+</div>
+
+<!-- FORM CARD -->
+<div class="bg-white rounded shadow-sm border border-gray-200 max-w-lg">
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Category Details</h2>
+    </div>
+    <form method="POST" class="px-6 py-5 space-y-4">
+        {% csrf_token %}
+
+        <!-- NAME -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Name <span class="text-red-500">*</span>
+            </label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.name.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Description
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.description.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <!-- NON FIELD ERRORS -->
+        {% if form.non_field_errors %}
+            <div class="bg-red-50 border border-red-200 rounded px-4 py-3 text-sm text-red-700">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <!-- BUTTONS -->
+        <div class="flex gap-3 pt-2">
+            <button type="submit"
+                    class="px-5 py-2 text-sm font-medium text-white rounded transition"
+                    style="background-color: #f97316;">
+                Save
+            </button>
+            <a href="{% url 'stock:category-list' %}"
+               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

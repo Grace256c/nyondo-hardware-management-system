@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Suppliers{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">Suppliers</h1>
+        <p class="text-sm text-gray-500 mt-1">Manage your suppliers</p>
+    </div>
+    <a href="{% url 'stock:supplier-create' %}"
+       class="px-4 py-2 text-sm font-medium text-white rounded transition"
+       style="background-color: #f97316;">
+        + Add Supplier
+    </a>
+</div>
+
+<div class="bg-white rounded shadow-sm border border-gray-200">
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">#</th>
+                <th class="text-left px-6 py-3 font-medium">Name</th>
+                <th class="text-left px-6 py-3 font-medium">Phone</th>
+                <th class="text-left px-6 py-3 font-medium">Address</th>
+                <th class="text-left px-6 py-3 font-medium">TIN</th>
+                <th class="text-left px-6 py-3 font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in suppliers %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                <td class="px-6 py-3 text-gray-500">{{ forloop.counter }}</td>
+                <td class="px-6 py-3 font-medium text-gray-800">{{ supplier.name }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ supplier.phone }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ supplier.address|truncatechars:30 }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ supplier.tin|default:"-" }}</td>
+                <td class="px-6 py-3 flex gap-3">
+                    <a href="{% url 'stock:supplier-detail' supplier.pk %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #0a1f44;">View</a>
+                    <a href="{% url 'stock:supplier-update' supplier.pk %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #f97316;">Edit</a>
+                    <a href="{% url 'stock:supplier-delete' supplier.pk %}"
+                       class="text-sm font-medium text-red-500 hover:underline">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="px-6 py-6 text-center text-gray-400">
+                    No suppliers found. Add one to get started.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
