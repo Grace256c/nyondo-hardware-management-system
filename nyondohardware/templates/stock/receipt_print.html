@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRN - {{ receipt.grn_number }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body class="bg-white p-8 max-w-2xl mx-auto">
+
+    <!-- PRINT BUTTON -->
+    <div class="no-print mb-6 flex gap-3">
+        <button onclick="window.print()"
+                class="px-4 py-2 text-sm font-medium text-white rounded"
+                style="background-color: #f97316;">
+            Print GRN
+        </button>
+        <a href="{% url 'stock:receipt-detail' receipt.pk %}"
+           class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded">
+            Back
+        </a>
+    </div>
+
+    <!-- COMPANY HEADER -->
+    <div class="text-center mb-8 border-b pb-6">
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">
+            NYONDO GENERAL HARDWARE LTD
+        </h1>
+        <p class="text-sm text-gray-500">Nansana, Uganda</p>
+        <p class="text-sm text-gray-500">Hardware & Construction Materials</p>
+    </div>
+
+    <!-- GRN TITLE -->
+    <div class="text-center mb-6">
+        <h2 class="text-lg font-bold uppercase tracking-widest" style="color: #0a1f44;">
+            Goods Received Note
+        </h2>
+        <p class="text-sm text-gray-500">{{ receipt.grn_number }}</p>
+    </div>
+
+    <!-- GRN DETAILS -->
+    <div class="grid grid-cols-2 gap-6 mb-8 text-sm">
+        <div class="space-y-2">
+            <div class="flex justify-between">
+                <span class="text-gray-500">GRN Number:</span>
+                <span class="font-medium">{{ receipt.grn_number }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Date:</span>
+                <span class="font-medium">{{ receipt.receipt_date }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Received By:</span>
+                <span class="font-medium">{{ receipt.recorded_by.get_full_name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Payment:</span>
+                <span class="font-medium">{{ receipt.payment_status|title }}</span>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Supplier:</span>
+                <span class="font-medium">{{ receipt.supplier.name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Phone:</span>
+                <span class="font-medium">{{ receipt.supplier.phone }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Address:</span>
+                <span class="font-medium">{{ receipt.supplier.address }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ITEMS TABLE -->
+    <table class="w-full text-sm mb-8 border border-gray-200">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-4 py-3 font-medium">Product</th>
+                <th class="text-left px-4 py-3 font-medium">Unit</th>
+                <th class="text-right px-4 py-3 font-medium">Quantity</th>
+                <th class="text-right px-4 py-3 font-medium">Unit Cost</th>
+                <th class="text-right px-4 py-3 font-medium">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="border-t border-gray-200">
+                <td class="px-4 py-3">{{ receipt.product.name }}</td>
+                <td class="px-4 py-3">{{ receipt.product.get_unit_display }}</td>
+                <td class="px-4 py-3 text-right">{{ receipt.quantity }}</td>
+                <td class="px-4 py-3 text-right">UGX {{ receipt.unit_cost|floatformat:0 }}</td>
+                <td class="px-4 py-3 text-right font-medium">UGX {{ receipt.total_cost|floatformat:0 }}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr class="border-t-2 border-gray-300">
+                <td colspan="4" class="px-4 py-3 text-right font-bold">Total:</td>
+                <td class="px-4 py-3 text-right font-bold" style="color: #0a1f44;">
+                    UGX {{ receipt.total_cost|floatformat:0 }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- NOTES -->
+    {% if receipt.notes %}
+    <div class="mb-8 text-sm">
+        <p class="font-medium text-gray-700">Notes:</p>
+        <p class="text-gray-600">{{ receipt.notes }}</p>
+    </div>
+    {% endif %}
+
+    <!-- SIGNATURE LINES -->
+    <div class="grid grid-cols-2 gap-12 mt-12 text-sm">
+        <div>
+            <div class="border-t border-gray-400 pt-2">
+                <p class="text-gray-600">Received By</p>
+                <p class="text-gray-400 text-xs mt-1">Name & Signature</p>
+            </div>
+        </div>
+        <div>
+            <div class="border-t border-gray-400 pt-2">
+                <p class="text-gray-600">Supplier Representative</p>
+                <p class="text-gray-400 text-xs mt-1">Name & Signature</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="mt-12 text-center text-xs text-gray-400 border-t pt-4">
+        <p>NYONDO General Hardware LTD &mdash; Nansana, Uganda</p>
+        <p>This is an official Goods Received Note</p>
+    </div>
+
+</body>
+</html>

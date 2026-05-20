@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Credit - {{ credit.supplier.name }}{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">
+            Credit — {{ credit.supplier.name }}
+        </h1>
+        <p class="text-sm text-gray-500 mt-1">
+            <a href="{% url 'stock:credit-list' %}" class="hover:underline" style="color: #f97316;">
+                Supplier Credits
+            </a>
+            &rsaquo; {{ credit.supplier.name }}
+        </p>
+    </div>
+    {% if credit.status != 'paid' %}
+    <div class="flex gap-3">
+        <a href="{% url 'stock:credit-update' credit.pk %}"
+           class="px-4 py-2 text-sm font-medium text-white rounded transition"
+           style="background-color: #0a1f44;">
+            Edit
+        </a>
+        <a href="{% url 'stock:credit-pay' credit.pk %}"
+           class="px-4 py-2 text-sm font-medium text-white rounded transition"
+           style="background-color: #f97316;">
+            Record Payment
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- CREDIT SUMMARY CARDS -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Amount</p>
+        <p class="text-2xl font-bold" style="color: #0a1f44;">
+            UGX {{ credit.total_amount|floatformat:0 }}
+        </p>
+    </div>
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Amount Paid</p>
+        <p class="text-2xl font-bold text-green-600">
+            UGX {{ credit.amount_paid|floatformat:0 }}
+        </p>
+    </div>
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Balance</p>
+        <p class="text-2xl font-bold" style="color: #f97316;">
+            UGX {{ credit.balance|floatformat:0 }}
+        </p>
+    </div>
+</div>
+
+<!-- CREDIT INFO -->
+<div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-5 mb-6">
+    <h2 class="text-sm font-semibold text-gray-700 mb-4">Credit Information</h2>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+        <div class="space-y-3">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Supplier</span>
+                <span class="font-medium text-gray-800">{{ credit.supplier.name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">GRN Number</span>
+                <span class="font-medium text-gray-800">
+                    {{ credit.stock_receipt.grn_number }}
+                </span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Product</span>
+                <span class="font-medium text-gray-800">
+                    {{ credit.stock_receipt.product.name }}
+                </span>
+            </div>
+        </div>
+        <div class="space-y-3">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Status</span>
+                <span class="text-xs px-2 py-1 rounded
+                    {% if credit.status == 'paid' %}bg-green-100 text-green-700
+                    {% elif credit.status == 'partial' %}bg-yellow-100 text-yellow-700
+                    {% else %}bg-red-100 text-red-700{% endif %}">
+                    {{ credit.status|title }}
+                </span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Due Date</span>
+                <span class="font-medium text-gray-800">{{ credit.due_date|default:"-" }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Created</span>
+                <span class="font-medium text-gray-800">{{ credit.created_at|date:"d M Y" }}</span>
+            </div>
+        </div>
+    </div>
+    {% if credit.notes %}
+    <div class="mt-4 pt-4 border-t border-gray-100 text-sm">
+        <span class="text-gray-500">Notes: </span>
+        <span class="text-gray-800">{{ credit.notes }}</span>
+    </div>
+    {% endif %}
+</div>
+
+<!-- PAYMENT HISTORY -->
+<div class="bg-white rounded shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Payment History</h2>
+    </div>
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">#</th>
+                <th class="text-left px-6 py-3 font-medium">Amount</th>
+                <th class="text-left px-6 py-3 font-medium">Method</th>
+                <th class="text-left px-6 py-3 font-medium">Reference</th>
+                <th class="text-left px-6 py-3 font-medium">Date</th>
+                <th class="text-left px-6 py-3 font-medium">Recorded By</th>
+                <th class="text-left px-6 py-3 font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                <td class="px-6 py-3 text-gray-500">{{ forloop.counter }}</td>
+                <td class="px-6 py-3 font-medium text-green-600">
+                    UGX {{ payment.amount|floatformat:0 }}
+                </td>
+                <td class="px-6 py-3 text-gray-700">{{ payment.get_payment_method_display }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ payment.reference|default:"-" }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ payment.payment_date }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ payment.recorded_by.get_full_name }}</td>
+                <td class="px-6 py-3">
+                    <a href="{% url 'stock:payment-delete' payment.pk %}"
+                       class="text-sm font-medium text-red-500 hover:underline">
+                        Reverse
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="px-6 py-6 text-center text-gray-400">
+                    No payments recorded yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

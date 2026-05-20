@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Stock Receipts{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">Stock Receipts (GRNs)</h1>
+        <p class="text-sm text-gray-500 mt-1">All goods received notes</p>
+    </div>
+    <a href="{% url 'stock:receipt-create' %}"
+       class="px-4 py-2 text-sm font-medium text-white rounded transition"
+       style="background-color: #f97316;">
+        + Receive Stock
+    </a>
+</div>
+
+<div class="bg-white rounded shadow-sm border border-gray-200">
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">GRN No.</th>
+                <th class="text-left px-6 py-3 font-medium">Supplier</th>
+                <th class="text-left px-6 py-3 font-medium">Product</th>
+                <th class="text-left px-6 py-3 font-medium">Qty</th>
+                <th class="text-left px-6 py-3 font-medium">Total Cost</th>
+                <th class="text-left px-6 py-3 font-medium">Payment</th>
+                <th class="text-left px-6 py-3 font-medium">Date</th>
+                <th class="text-left px-6 py-3 font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for receipt in receipts %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                <td class="px-6 py-3 font-medium" style="color: #0a1f44;">
+                    <a href="{% url 'stock:receipt-detail' receipt.pk %}" class="hover:underline">
+                        {{ receipt.grn_number }}
+                    </a>
+                </td>
+                <td class="px-6 py-3 text-gray-700">{{ receipt.supplier.name }}</td>
+                <td class="px-6 py-3 text-gray-700">{{ receipt.product.name }}</td>
+                <td class="px-6 py-3 text-gray-700">{{ receipt.quantity }} {{ receipt.product.unit }}</td>
+                <td class="px-6 py-3 text-gray-700">UGX {{ receipt.total_cost|floatformat:0 }}</td>
+                <td class="px-6 py-3">
+                    <span class="text-xs px-2 py-1 rounded
+                        {% if receipt.payment_status == 'cash' %}bg-green-100 text-green-700
+                        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                        {{ receipt.payment_status|title }}
+                    </span>
+                </td>
+                <td class="px-6 py-3 text-gray-600">{{ receipt.receipt_date }}</td>
+                <td class="px-6 py-3 flex gap-3">
+                    <a href="{% url 'stock:receipt-detail' receipt.pk %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #0a1f44;">View</a>
+                    <a href="{% url 'stock:receipt-print' receipt.pk %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #f97316;">Print</a>
+                    <a href="{% url 'stock:receipt-delete' receipt.pk %}"
+                       class="text-sm font-medium text-red-500 hover:underline">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="px-6 py-6 text-center text-gray-400">
+                    No stock receipts found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">{{ product.name }}</h1>
+        <p class="text-sm text-gray-500 mt-1">
+            <a href="{% url 'stock:product-list' %}" class="hover:underline" style="color: #f97316;">
+                Products
+            </a>
+            &rsaquo; {{ product.name }}
+        </p>
+    </div>
+    <a href="{% url 'stock:product-update' product.pk %}"
+       class="px-4 py-2 text-sm font-medium text-white rounded transition"
+       style="background-color: #f97316;">
+        Edit Product
+    </a>
+</div>
+
+<!-- PRODUCT INFO + STOCK LEVEL -->
+<div class="grid grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-5">
+        <h2 class="text-sm font-semibold text-gray-700 mb-4">Product Information</h2>
+        <div class="space-y-3 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Name</span>
+                <span class="font-medium text-gray-800">{{ product.name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Category</span>
+                <span class="font-medium text-gray-800">{{ product.category.name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Unit</span>
+                <span class="font-medium text-gray-800">{{ product.get_unit_display }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Cost Price</span>
+                <span class="font-medium text-gray-800">UGX {{ product.cost_price|floatformat:0 }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Retail Price</span>
+                <span class="font-medium text-gray-800">UGX {{ product.retail_price|floatformat:0 }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Wholesale Price</span>
+                <span class="font-medium text-gray-800">UGX {{ product.wholesale_price|floatformat:0 }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Reorder Level</span>
+                <span class="font-medium text-gray-800">{{ product.reorder_level }}</span>
+            </div>
+            {% if product.description %}
+            <div class="flex justify-between">
+                <span class="text-gray-500">Description</span>
+                <span class="font-medium text-gray-800">{{ product.description }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- STOCK LEVEL CARD -->
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-5">
+        <h2 class="text-sm font-semibold text-gray-700 mb-4">Current Stock</h2>
+        <div class="flex flex-col items-center justify-center h-32">
+            <p class="text-5xl font-bold mb-2"
+               style="color: #0a1f44;">{{ product.quantity }}</p>
+            <p class="text-sm text-gray-500">{{ product.get_unit_display }}s in stock</p>
+            <div class="mt-3">
+                {% if product.quantity <= product.reorder_level %}
+                    <span class="text-xs px-3 py-1 rounded-full bg-red-100 text-red-700 font-medium">
+                        Low Stock — Reorder Now
+                    </span>
+                {% elif product.quantity <= product.reorder_level|add:product.reorder_level %}
+                    <span class="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 font-medium">
+                        Medium Stock
+                    </span>
+                {% else %}
+                    <span class="text-xs px-3 py-1 rounded-full bg-green-100 text-green-700 font-medium">
+                        Good Stock Level
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RECEIPT HISTORY -->
+<div class="bg-white rounded shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Stock Receipt History</h2>
+    </div>
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">GRN No.</th>
+                <th class="text-left px-6 py-3 font-medium">Supplier</th>
+                <th class="text-left px-6 py-3 font-medium">Qty</th>
+                <th class="text-left px-6 py-3 font-medium">Unit Cost</th>
+                <th class="text-left px-6 py-3 font-medium">Total Cost</th>
+                <th class="text-left px-6 py-3 font-medium">Payment</th>
+                <th class="text-left px-6 py-3 font-medium">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for receipt in receipts %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                <td class="px-6 py-3 font-medium" style="color: #0a1f44;">
+                    <a href="{% url 'stock:receipt-detail' receipt.pk %}" class="hover:underline">
+                        {{ receipt.grn_number }}
+                    </a>
+                </td>
+                <td class="px-6 py-3 text-gray-700">{{ receipt.supplier.name }}</td>
+                <td class="px-6 py-3 text-gray-700">{{ receipt.quantity }}</td>
+                <td class="px-6 py-3 text-gray-700">UGX {{ receipt.unit_cost|floatformat:0 }}</td>
+                <td class="px-6 py-3 text-gray-700">UGX {{ receipt.total_cost|floatformat:0 }}</td>
+                <td class="px-6 py-3">
+                    <span class="text-xs px-2 py-1 rounded
+                        {% if receipt.payment_status == 'cash' %}bg-green-100 text-green-700
+                        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+                        {{ receipt.payment_status|title }}
+                    </span>
+                </td>
+                <td class="px-6 py-3 text-gray-600">{{ receipt.receipt_date }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="px-6 py-6 text-center text-gray-400">
+                    No receipts found for this product.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

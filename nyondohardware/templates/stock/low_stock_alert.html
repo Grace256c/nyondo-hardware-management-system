@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Low Stock Alerts{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">Low Stock Alerts</h1>
+        <p class="text-sm text-gray-500 mt-1">
+            Products at or below reorder level
+        </p>
+    </div>
+    <a href="{% url 'stock:receipt-create' %}"
+       class="px-4 py-2 text-sm font-medium text-white rounded transition"
+       style="background-color: #f97316;">
+        + Receive Stock
+    </a>
+</div>
+
+{% if products %}
+<div class="bg-red-50 border border-red-200 rounded px-4 py-3 mb-6 text-sm text-red-700">
+    <strong>{{ products.count }} product{{ products.count|pluralize }}</strong>
+    at or below reorder level. Please restock soon.
+</div>
+{% endif %}
+
+<div class="bg-white rounded shadow-sm border border-gray-200">
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">#</th>
+                <th class="text-left px-6 py-3 font-medium">Product</th>
+                <th class="text-left px-6 py-3 font-medium">Category</th>
+                <th class="text-left px-6 py-3 font-medium">Current Stock</th>
+                <th class="text-left px-6 py-3 font-medium">Reorder Level</th>
+                <th class="text-left px-6 py-3 font-medium">Shortage</th>
+                <th class="text-left px-6 py-3 font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                <td class="px-6 py-3 text-gray-500">{{ forloop.counter }}</td>
+                <td class="px-6 py-3 font-medium text-gray-800">{{ product.name }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ product.category.name }}</td>
+                <td class="px-6 py-3">
+                    <span class="text-xs px-2 py-1 rounded bg-red-100 text-red-700 font-medium">
+                        {{ product.quantity }} {{ product.get_unit_display }}
+                    </span>
+                </td>
+                <td class="px-6 py-3 text-gray-600">
+                    {{ product.reorder_level }} {{ product.get_unit_display }}
+                </td>
+                <td class="px-6 py-3 font-medium text-red-500">
+                    {{ product.reorder_level|add:"-"|add:product.quantity }}
+                    below
+                </td>
+                <td class="px-6 py-3 flex gap-3">
+                    <a href="{% url 'stock:product-detail' product.pk %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #0a1f44;">View</a>
+                    <a href="{% url 'stock:receipt-create' %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #f97316;">Reorder</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="px-6 py-6 text-center text-gray-400">
+                    All products are at good stock levels.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

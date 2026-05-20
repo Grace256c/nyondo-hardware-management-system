@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment History{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">Payment History</h1>
+        <p class="text-sm text-gray-500 mt-1">
+            <a href="{% url 'stock:credit-list' %}" class="hover:underline" style="color: #f97316;">
+                Supplier Credits
+            </a>
+            &rsaquo;
+            <a href="{% url 'stock:credit-detail' credit.pk %}" class="hover:underline" style="color: #f97316;">
+                {{ credit.supplier.name }}
+            </a>
+            &rsaquo; Payments
+        </p>
+    </div>
+    {% if credit.status != 'paid' %}
+    <a href="{% url 'stock:credit-pay' credit.pk %}"
+       class="px-4 py-2 text-sm font-medium text-white rounded transition"
+       style="background-color: #f97316;">
+        + Record Payment
+    </a>
+    {% endif %}
+</div>
+
+<!-- BALANCE SUMMARY -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Amount</p>
+        <p class="text-2xl font-bold" style="color: #0a1f44;">
+            UGX {{ credit.total_amount|floatformat:0 }}
+        </p>
+    </div>
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Paid</p>
+        <p class="text-2xl font-bold text-green-600">
+            UGX {{ credit.amount_paid|floatformat:0 }}
+        </p>
+    </div>
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Balance</p>
+        <p class="text-2xl font-bold" style="color: #f97316;">
+            UGX {{ credit.balance|floatformat:0 }}
+        </p>
+    </div>
+</div>
+
+<!-- PAYMENTS TABLE -->
+<div class="bg-white rounded shadow-sm border border-gray-200">
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">#</th>
+                <th class="text-left px-6 py-3 font-medium">Amount</th>
+                <th class="text-left px-6 py-3 font-medium">Method</th>
+                <th class="text-left px-6 py-3 font-medium">Reference</th>
+                <th class="text-left px-6 py-3 font-medium">Date</th>
+                <th class="text-left px-6 py-3 font-medium">Recorded By</th>
+                <th class="text-left px-6 py-3 font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                <td class="px-6 py-3 text-gray-500">{{ forloop.counter }}</td>
+                <td class="px-6 py-3 font-medium text-green-600">
+                    UGX {{ payment.amount|floatformat:0 }}
+                </td>
+                <td class="px-6 py-3 text-gray-700">
+                    {{ payment.get_payment_method_display }}
+                </td>
+                <td class="px-6 py-3 text-gray-600">{{ payment.reference|default:"-" }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ payment.payment_date }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ payment.recorded_by.get_full_name }}</td>
+                <td class="px-6 py-3">
+                    <a href="{% url 'stock:payment-delete' payment.pk %}"
+                       class="text-sm font-medium text-red-500 hover:underline">
+                        Reverse
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="px-6 py-6 text-center text-gray-400">
+                    No payments recorded yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
