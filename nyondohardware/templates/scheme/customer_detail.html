@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ customer.full_name }}{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">{{ customer.full_name }}</h1>
+        <p class="text-sm text-gray-500 mt-1">
+            <a href="{% url 'scheme:customer-list' %}" class="hover:underline" style="color: #f97316;">
+                Scheme Customers
+            </a>
+            &rsaquo; {{ customer.full_name }}
+        </p>
+    </div>
+    <div class="flex gap-3">
+        <a href="{% url 'scheme:deposit-create' customer.pk %}"
+           class="px-4 py-2 text-sm font-medium text-white rounded transition"
+           style="background-color: #f97316;">
+            + Record Deposit
+        </a>
+        <a href="{% url 'scheme:pickup-create' customer.pk %}"
+           class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700 transition">
+            + New Pickup
+        </a>
+    </div>
+</div>
+
+<!-- BALANCE CARD -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Deposited</p>
+        <p class="text-2xl font-bold" style="color: #0a1f44;">
+            UGX {% with total=customer.deposits.all %}
+                {{ total|length }}
+            {% endwith %}
+        </p>
+    </div>
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Current Balance</p>
+        <p class="text-2xl font-bold" style="color: #f97316;">
+            UGX {{ balance|floatformat:0 }}
+        </p>
+    </div>
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Status</p>
+        <span class="text-sm px-3 py-1 rounded font-medium
+            {% if customer.status == 'active' %}bg-green-100 text-green-700
+            {% else %}bg-red-100 text-red-700{% endif %}">
+            {{ customer.status|title }}
+        </span>
+    </div>
+</div>
+
+<!-- CUSTOMER INFO -->
+<div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-5 mb-6">
+    <h2 class="text-sm font-semibold text-gray-700 mb-4">Customer Information</h2>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+        <div class="space-y-3">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Full Name</span>
+                <span class="font-medium text-gray-800">{{ customer.full_name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">NIN</span>
+                <span class="font-medium text-gray-800">{{ customer.nin }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Phone</span>
+                <span class="font-medium text-gray-800">{{ customer.phone }}</span>
+            </div>
+        </div>
+        <div class="space-y-3">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Employer</span>
+                <span class="font-medium text-gray-800">{{ customer.employer|default:"-" }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Registered</span>
+                <span class="font-medium text-gray-800">{{ customer.registration_date }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Registered By</span>
+                <span class="font-medium text-gray-800">{{ customer.registered_by.get_full_name }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DEPOSITS -->
+<div class="bg-white rounded shadow-sm border border-gray-200 mb-6">
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Deposit History</h2>
+    </div>
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">Receipt No.</th>
+                <th class="text-left px-6 py-3 font-medium">Amount</th>
+                <th class="text-left px-6 py-3 font-medium">Method</th>
+                <th class="text-left px-6 py-3 font-medium">Date</th>
+                <th class="text-left px-6 py-3 font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for deposit in deposits %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                <td class="px-6 py-3 font-medium" style="color: #0a1f44;">
+                    <a href="{% url 'scheme:deposit-receipt' deposit.pk %}" class="hover:underline">
+                        {{ deposit.receipt_number }}
+                    </a>
+                </td>
+                <td class="px-6 py-3 font-medium text-green-600">
+                    UGX {{ deposit.amount|floatformat:0 }}
+                </td>
+                <td class="px-6 py-3 text-gray-600">{{ deposit.get_payment_method_display }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ deposit.payment_date }}</td>
+                <td class="px-6 py-3 flex gap-3">
+                    <a href="{% url 'scheme:deposit-receipt' deposit.pk %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #f97316;">Receipt</a>
+                    <a href="{% url 'scheme:deposit-reverse' deposit.pk %}"
+                       class="text-sm font-medium text-red-500 hover:underline">Reverse</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="px-6 py-6 text-center text-gray-400">
+                    No deposits yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- PICKUPS -->
+<div class="bg-white rounded shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Pickup History</h2>
+    </div>
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">Product</th>
+                <th class="text-left px-6 py-3 font-medium">Qty</th>
+                <th class="text-left px-6 py-3 font-medium">Value</th>
+                <th class="text-left px-6 py-3 font-medium">Date</th>
+                <th class="text-left px-6 py-3 font-medium">Status</th>
+                <th class="text-left px-6 py-3 font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pickup in pickups %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                <td class="px-6 py-3 font-medium text-gray-800">{{ pickup.product.name }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ pickup.quantity }}</td>
+                <td class="px-6 py-3 text-gray-700">UGX {{ pickup.total_value|floatformat:0 }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ pickup.pickup_date }}</td>
+                <td class="px-6 py-3">
+                    <span class="text-xs px-2 py-1 rounded
+                        {% if pickup.status == 'dispatched' %}bg-green-100 text-green-700
+                        {% elif pickup.status == 'pending' %}bg-yellow-100 text-yellow-700
+                        {% else %}bg-red-100 text-red-700{% endif %}">
+                        {{ pickup.status|title }}
+                    </span>
+                </td>
+                <td class="px-6 py-3">
+                    <a href="{% url 'scheme:pickup-detail' pickup.pk %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #0a1f44;">View</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="px-6 py-6 text-center text-gray-400">
+                    No pickups yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
