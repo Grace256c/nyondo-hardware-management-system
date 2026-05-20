@@ -5,11 +5,21 @@ import re
 
 # ─── HELPER: adds Tailwind styling to all form fields ───────────
 def style_fields(form):
-    for field in form.fields.values():
-        field.widget.attrs.update({
-            'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-orange-400'
-        })
-
+    for name, field in form.fields.items():
+        widget_type = field.widget.__class__.__name__
+        if widget_type == 'Select':
+            field.widget.attrs.update({
+                'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white cursor-pointer'
+            })
+        elif widget_type == 'Textarea':
+            field.widget.attrs.update({
+                'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm',
+                'rows': '3'
+            })
+        else:
+            field.widget.attrs.update({
+                'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm'
+            })
 
 # ─── CATEGORY FORM ──────────────────────────────────────────────
 class CategoryForm(forms.ModelForm):

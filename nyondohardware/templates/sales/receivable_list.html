@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Receivables{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">Receivables</h1>
+        <p class="text-sm text-gray-500 mt-1">Customers who owe outstanding balances</p>
+    </div>
+</div>
+
+<div class="bg-white rounded shadow-sm border border-gray-200">
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">Invoice No.</th>
+                <th class="text-left px-6 py-3 font-medium">Customer</th>
+                <th class="text-left px-6 py-3 font-medium">Total</th>
+                <th class="text-left px-6 py-3 font-medium">Paid</th>
+                <th class="text-left px-6 py-3 font-medium">Balance</th>
+                <th class="text-left px-6 py-3 font-medium">Due Date</th>
+                <th class="text-left px-6 py-3 font-medium">Status</th>
+                <th class="text-left px-6 py-3 font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for receivable in receivables %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                <td class="px-6 py-3 font-medium" style="color: #0a1f44;">
+                    <a href="{% url 'sales:invoice-detail' receivable.invoice.pk %}"
+                       class="hover:underline">
+                        {{ receivable.invoice.invoice_number }}
+                    </a>
+                </td>
+                <td class="px-6 py-3 text-gray-700">{{ receivable.customer.name }}</td>
+                <td class="px-6 py-3 text-gray-700">UGX {{ receivable.total_amount|floatformat:0 }}</td>
+                <td class="px-6 py-3 text-green-600">UGX {{ receivable.amount_paid|floatformat:0 }}</td>
+                <td class="px-6 py-3 font-medium text-red-500">
+                    UGX {{ receivable.balance|floatformat:0 }}
+                </td>
+                <td class="px-6 py-3 text-gray-600">{{ receivable.due_date|default:"-" }}</td>
+                <td class="px-6 py-3">
+                    <span class="text-xs px-2 py-1 rounded
+                        {% if receivable.status == 'paid' %}bg-green-100 text-green-700
+                        {% elif receivable.status == 'partial' %}bg-yellow-100 text-yellow-700
+                        {% elif receivable.status == 'written_off' %}bg-gray-100 text-gray-600
+                        {% else %}bg-red-100 text-red-700{% endif %}">
+                        {{ receivable.get_status_display }}
+                    </span>
+                </td>
+                <td class="px-6 py-3 flex gap-3">
+                    <a href="{% url 'sales:receivable-detail' receivable.pk %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #0a1f44;">View</a>
+                    {% if receivable.status != 'paid' and receivable.status != 'written_off' %}
+                    <a href="{% url 'sales:receivable-pay' receivable.pk %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #f97316;">Pay</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="px-6 py-6 text-center text-gray-400">
+                    No outstanding receivables.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

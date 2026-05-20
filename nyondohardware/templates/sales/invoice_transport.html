@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Override Transport{% endblock %}
+
+{% block content %}
+
+<div class="mb-6">
+    <h1 class="text-2xl font-bold" style="color: #0a1f44;">Override Transport Charge</h1>
+    <p class="text-sm text-gray-500 mt-1">
+        <a href="{% url 'sales:invoice-list' %}" class="hover:underline" style="color: #f97316;">
+            Invoices
+        </a>
+        &rsaquo;
+        <a href="{% url 'sales:invoice-detail' invoice.pk %}" class="hover:underline" style="color: #f97316;">
+            {{ invoice.invoice_number }}
+        </a>
+        &rsaquo; Override Transport
+    </p>
+</div>
+
+<div class="bg-yellow-50 border border-yellow-200 rounded px-4 py-3 mb-6 text-sm text-yellow-800">
+    <strong>Manager Action:</strong> The transport charge is automatically calculated.
+    Only override if there is a valid business reason.
+</div>
+
+<div class="bg-white rounded shadow-sm border border-gray-200 max-w-lg">
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Transport Details</h2>
+        <p class="text-xs text-gray-400 mt-1">
+            Current charge: UGX {{ invoice.transport_charge|floatformat:0 }}
+        </p>
+    </div>
+    <form method="POST" class="px-6 py-5 space-y-4">
+        {% csrf_token %}
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                New Transport Charge (UGX) <span class="text-red-500">*</span>
+            </label>
+            {{ form.transport_charge }}
+            <p class="text-xs text-gray-400 mt-1">
+                Standard rule: free within 10km for orders above UGX 500,000,
+                otherwise UGX 30,000.
+            </p>
+            {% if form.transport_charge.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.transport_charge.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Reason for Override <span class="text-red-500">*</span>
+            </label>
+            {{ form.reason }}
+            {% if form.reason.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.reason.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="bg-red-50 border border-red-200 rounded px-4 py-3 text-sm text-red-700">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="flex gap-3 pt-2">
+            <button type="submit"
+                    class="px-5 py-2 text-sm font-medium text-white rounded transition"
+                    style="background-color: #f97316;">
+                Apply Override
+            </button>
+            <a href="{% url 'sales:invoice-detail' invoice.pk %}"
+               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
