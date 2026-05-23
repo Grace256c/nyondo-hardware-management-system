@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Scheme Customer{% endblock %}
+
+{% block content %}
+
+<div class="mb-6">
+    <h1 class="text-2xl font-bold" style="color: #0a1f44;">Edit Customer</h1>
+    <p class="text-sm text-gray-500 mt-1">
+        <a href="{% url 'scheme:customer-list' %}" class="hover:underline" style="color: #f97316;">
+            Scheme Customers
+        </a>
+        &rsaquo;
+        <a href="{% url 'scheme:customer-detail' customer.pk %}" class="hover:underline" style="color: #f97316;">
+            {{ customer.full_name }}
+        </a>
+        &rsaquo; Edit
+    </p>
+</div>
+
+<div class="bg-white rounded shadow-sm border border-gray-200 max-w-lg">
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Update Details</h2>
+        <p class="text-xs text-gray-400 mt-1">Full name and NIN cannot be changed.</p>
+    </div>
+
+    <!-- READ ONLY INFO -->
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-100 text-sm space-y-2">
+        <div class="flex justify-between">
+            <span class="text-gray-500">Full Name</span>
+            <span class="font-medium text-gray-800">{{ customer.full_name }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-500">NIN</span>
+            <span class="font-medium text-gray-800">{{ customer.nin }}</span>
+        </div>
+    </div>
+
+    <form method="POST" class="px-6 py-5 space-y-4">
+        {% csrf_token %}
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Phone <span class="text-red-500">*</span>
+            </label>
+            {{ form.phone }}
+            {% if form.phone.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.phone.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Employer</label>
+            {{ form.employer }}
+            {% if form.employer.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.employer.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Employer Address</label>
+            {{ form.employer_address }}
+            {% if form.employer_address.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.employer_address.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="flex gap-3 pt-2">
+            <button type="submit"
+                    class="px-5 py-2 text-sm font-medium text-white rounded transition"
+                    style="background-color: #f97316;">
+                Save
+            </button>
+            <a href="{% url 'scheme:customer-detail' customer.pk %}"
+               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

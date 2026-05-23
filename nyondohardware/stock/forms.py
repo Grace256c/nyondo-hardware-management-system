@@ -1,5 +1,12 @@
 from django import forms
-from .models import Category, Supplier, Product, StockReceipt, SupplierCredit, SupplierPayment
+from .models import (
+    Category,
+    Supplier,
+    Product,
+    StockReceipt,
+    SupplierCredit,
+    SupplierPayment,
+)
 import re
 
 
@@ -7,35 +14,43 @@ import re
 def style_fields(form):
     for name, field in form.fields.items():
         widget_type = field.widget.__class__.__name__
-        if widget_type == 'Select':
-            field.widget.attrs.update({
-                'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white cursor-pointer'
-            })
-        elif widget_type == 'Textarea':
-            field.widget.attrs.update({
-                'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm',
-                'rows': '3'
-            })
+        if widget_type == "Select":
+            field.widget.attrs.update(
+                {
+                    "class": "w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white cursor-pointer"
+                }
+            )
+        elif widget_type == "Textarea":
+            field.widget.attrs.update(
+                {
+                    "class": "w-full border border-gray-300 rounded px-3 py-2 text-sm",
+                    "rows": "3",
+                }
+            )
         else:
-            field.widget.attrs.update({
-                'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm'
-            })
+            field.widget.attrs.update(
+                {"class": "w-full border border-gray-300 rounded px-3 py-2 text-sm"}
+            )
+
 
 # ─── CATEGORY FORM ──────────────────────────────────────────────
 class CategoryForm(forms.ModelForm):
-
     class Meta:
-        model  = Category
-        fields = ['name', 'description']
+        model = Category
+        fields = ["name", "description"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         style_fields(self)
 
     def clean_name(self):
-        name = self.cleaned_data.get('name')
-        if Category.objects.filter(name__iexact=name).exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError('A category with this name already exists.')
+        name = self.cleaned_data.get("name")
+        if (
+            Category.objects.filter(name__iexact=name)
+            .exclude(pk=self.instance.pk)
+            .exists()
+        ):
+            raise forms.ValidationError("A category with this name already exists.")
         return name
 
 
@@ -49,53 +64,41 @@ class SupplierForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         style_fields(self)
+        self.fields['tin'].required = False
+        self.fields['tin'].help_text = 'Optional. 10 digit number.'
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
         if not re.match(r'^(\+?256|0)[7][0-9]{8}$', phone):
-            raise forms.ValidationError('Enter a valid Ugandan phone number.')
+            raise forms.ValidationError('Enter a valid Ugandan phone number e.g. 0712345678')
         return phone
 
+    def clean_tin(self):
+        tin = self.cleaned_data.get('tin')
+        if tin:
+            if not re.match(r'^\d{10}$', tin):
+                raise forms.ValidationError('TIN must be exactly 10 digits.')
+        return tin
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if not name or len(name) < 2:
+            raise forms.ValidationError('Supplier name must be at least 2 characters.')
+        return name
 
 # ─── PRODUCT FORM ───────────────────────────────────────────────
 class ProductForm(forms.ModelForm):
-
     class Meta:
-        model  = Product
+        model = Product
         fields = [
-            'name', 'category', 'unit',
-            'cost_price', 'retail_price', 'wholesale_price',
-            'reorder_level', 'description'
-        ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        style_fields(self)
-
-    def clean(self):
-        cleaned_data    = super().clean()
-        cost_price      = cleaned_data.get('cost_price')
-        retail_price    = cleaned_data.get('retail_price')
-        wholesale_price = cleaned_data.get('wholesale_price')
-
-        if cost_price and retail_price:
-            if retail_price <= cost_price:
-                raise forms.ValidationError('Retail price must be greater than cost price.')
-        if cost_price and wholesale_price:
-            if wholesale_price <= cost_price:
-                raise forms.ValidationError('Wholesale price must be greater than cost price.')
-
-        return cleaned_data
-
-
-# ─── STOCK RECEIPT FORM ─────────────────────────────────────────
-class StockReceiptForm(forms.ModelForm):
-
-    class Meta:
-        model  = StockReceipt
-        fields = [
-            'supplier', 'product', 'quantity',
-            'unit_cost', 'payment_status', 'receipt_date', 'notes'
+            "name",
+            "category",
+            "unit",
+            "cost_price",
+            "retail_price",
+            "wholesale_price",
+            "reorder_level",
+            "description",
         ]
 
     def __init__(self, *args, **kwargs):
@@ -104,23 +107,66 @@ class StockReceiptForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        quantity     = cleaned_data.get('quantity')
-        unit_cost    = cleaned_data.get('unit_cost')
+        cost_price = cleaned_data.get("cost_price")
+        retail_price = cleaned_data.get("retail_price")
+        wholesale_price = cleaned_data.get("wholesale_price")
+
+        if cost_price and retail_price:
+            if retail_price <= cost_price:
+                raise forms.ValidationError(
+                    "Retail price must be greater than cost price."
+                )
+        if cost_price and wholesale_price:
+            if wholesale_price <= cost_price:
+                raise forms.ValidationError(
+                    "Wholesale price must be greater than cost price."
+                )
+
+        return cleaned_data
+
+
+# ─── STOCK RECEIPT FORM ─────────────────────────────────────────
+class StockReceiptForm(forms.ModelForm):
+    class Meta:
+        model = StockReceipt
+        fields = [
+            "supplier",
+            "product",
+            "quantity",
+            "unit_cost",
+            "payment_status",
+            "receipt_date",
+            "notes",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        style_fields(self)
+        self.fields["receipt_date"].widget = forms.DateInput(
+            attrs={
+                "type": "date",
+                "class": "w-full border border-gray-300 rounded px-3 py-2 text-sm",
+            }
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        quantity = cleaned_data.get("quantity")
+        unit_cost = cleaned_data.get("unit_cost")
 
         if quantity and quantity <= 0:
-            raise forms.ValidationError('Quantity must be greater than zero.')
+            raise forms.ValidationError("Quantity must be greater than zero.")
         if unit_cost and unit_cost <= 0:
-            raise forms.ValidationError('Unit cost must be greater than zero.')
+            raise forms.ValidationError("Unit cost must be greater than zero.")
 
         return cleaned_data
 
 
 # ─── SUPPLIER CREDIT EDIT FORM ──────────────────────────────────
 class SupplierCreditEditForm(forms.ModelForm):
-
     class Meta:
-        model  = SupplierCredit
-        fields = ['due_date', 'notes']
+        model = SupplierCredit
+        fields = ["due_date", "notes"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -129,20 +175,19 @@ class SupplierCreditEditForm(forms.ModelForm):
 
 # ─── SUPPLIER PAYMENT FORM ──────────────────────────────────────
 class SupplierPaymentForm(forms.ModelForm):
-
     class Meta:
-        model  = SupplierPayment
-        fields = ['amount', 'payment_date', 'payment_method', 'reference']
+        model = SupplierPayment
+        fields = ["amount", "payment_date", "payment_method", "reference"]
 
     def __init__(self, *args, **kwargs):
-        self.credit = kwargs.pop('credit', None)
+        self.credit = kwargs.pop("credit", None)
         super().__init__(*args, **kwargs)
         style_fields(self)
 
     def clean_amount(self):
-        amount = self.cleaned_data.get('amount')
+        amount = self.cleaned_data.get("amount")
         if self.credit and amount > self.credit.balance:
             raise forms.ValidationError(
-                f'Amount cannot exceed outstanding balance of {self.credit.balance}.'
+                f"Amount cannot exceed outstanding balance of {self.credit.balance}."
             )
         return amount

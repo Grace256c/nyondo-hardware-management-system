@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Stock Report{% endblock %}
+
+{% block content %}
+
+<div class="mb-6">
+    <h1 class="text-2xl font-bold" style="color: #0a1f44;">Stock Report</h1>
+    <p class="text-sm text-gray-500 mt-1">Current inventory valuation</p>
+</div>
+
+<!-- SUMMARY CARDS -->
+<div class="grid grid-cols-2 gap-4 mb-6">
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Cost Value</p>
+        <p class="text-2xl font-bold" style="color: #0a1f44;">
+            UGX {{ total_cost_value|floatformat:0 }}
+        </p>
+    </div>
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Retail Value</p>
+        <p class="text-2xl font-bold" style="color: #f97316;">
+            UGX {{ total_retail_value|floatformat:0 }}
+        </p>
+    </div>
+</div>
+
+<!-- STOCK TABLE -->
+<div class="bg-white rounded shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Product Inventory</h2>
+    </div>
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">#</th>
+                <th class="text-left px-6 py-3 font-medium">Product</th>
+                <th class="text-left px-6 py-3 font-medium">Category</th>
+                <th class="text-left px-6 py-3 font-medium">Unit</th>
+                <th class="text-left px-6 py-3 font-medium">Quantity</th>
+                <th class="text-left px-6 py-3 font-medium">Cost Value</th>
+                <th class="text-left px-6 py-3 font-medium">Retail Value</th>
+                <th class="text-left px-6 py-3 font-medium">Level</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50">
+                <td class="px-6 py-3 text-gray-500">{{ forloop.counter }}</td>
+                <td class="px-6 py-3 font-medium text-gray-800">{{ product.name }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ product.category.name }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ product.get_unit_display }}</td>
+                <td class="px-6 py-3 text-gray-700">{{ product.quantity|floatformat:0 }}</td>
+                <td class="px-6 py-3 text-gray-700">
+                    UGX {{ product.quantity|floatformat:0 }}
+                </td>
+                <td class="px-6 py-3 text-gray-700">
+                    UGX {{ product.retail_price|floatformat:0 }}
+                </td>
+                <td class="px-6 py-3">
+                    {% if product.quantity <= product.reorder_level %}
+                        <span class="text-xs px-2 py-1 rounded bg-red-100 text-red-700">Low</span>
+                    {% elif product.quantity <= product.reorder_level|add:product.reorder_level %}
+                        <span class="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700">Medium</span>
+                    {% else %}
+                        <span class="text-xs px-2 py-1 rounded bg-green-100 text-green-700">Good</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="px-6 py-6 text-center text-gray-400">
+                    No products found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

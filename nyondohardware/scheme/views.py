@@ -120,7 +120,11 @@ def deposit_create(request, pk):
 @sales_required
 def deposit_receipt(request, pk):
     deposit = get_object_or_404(Deposit, pk=pk)
-    return render(request, 'scheme/deposit_receipt.html', {'deposit': deposit})
+    balance = get_customer_balance(deposit.customer)
+    return render(request, 'scheme/deposit_receipt.html', {
+        'deposit': deposit,
+        'balance': balance,
+    })
 
 
 @admin_required

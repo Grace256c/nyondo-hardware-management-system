@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 
-{% block title %}Suspend Customer{% endblock %}
+{% block title %}Deactivate User{% endblock %}
 
 {% block content %}
 
 <div class="mb-6">
-    <h1 class="text-2xl font-bold" style="color: #0a1f44;">Suspend Customer</h1>
+    <h1 class="text-2xl font-bold" style="color: #0a1f44;">Deactivate User</h1>
     <p class="text-sm text-gray-500 mt-1">
-        <a href="{% url 'scheme:customer-list' %}" class="hover:underline" style="color: #f97316;">
-            Scheme Customers
+        <a href="{% url 'users:user-list' %}" class="hover:underline" style="color: #f97316;">
+            Users
         </a>
-        &rsaquo; Suspend
+        &rsaquo; Deactivate
     </p>
 </div>
 
@@ -24,22 +24,34 @@
             </div>
             <div>
                 <h2 class="text-sm font-semibold text-gray-800">Are you sure?</h2>
-                <p class="text-sm text-gray-500">This will suspend the customer's scheme account.</p>
+                <p class="text-sm text-gray-500">
+                    This user will no longer be able to log in.
+                </p>
             </div>
         </div>
 
-        <p class="text-sm text-gray-700 mb-6">
-            You are about to suspend <strong>{{ customer.full_name }}</strong>.
-            They will not be able to make deposits or pickups while suspended.
-        </p>
+        <div class="bg-gray-50 rounded px-4 py-3 mb-6 text-sm space-y-2">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Name</span>
+                <span class="font-medium">{{ user.get_full_name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Username</span>
+                <span class="font-medium">{{ user.username }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Role</span>
+                <span class="font-medium">{{ user.userprofile.get_role_display }}</span>
+            </div>
+        </div>
 
         <form method="POST" class="flex gap-3">
             {% csrf_token %}
             <button type="submit"
                     class="px-5 py-2 text-sm font-medium text-white bg-yellow-500 rounded hover:bg-yellow-600 transition">
-                Yes, Suspend
+                Yes, Deactivate
             </button>
-            <a href="{% url 'scheme:customer-detail' customer.pk %}"
+            <a href="{% url 'users:user-list' %}"
                class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition">
                 Cancel
             </a>

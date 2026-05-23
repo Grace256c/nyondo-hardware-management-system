@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Pickup Detail{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">Pickup Detail</h1>
+        <p class="text-sm text-gray-500 mt-1">
+            <a href="{% url 'scheme:customer-list' %}" class="hover:underline" style="color: #f97316;">
+                Scheme Customers
+            </a>
+            &rsaquo;
+            <a href="{% url 'scheme:customer-detail' pickup.customer.pk %}" class="hover:underline" style="color: #f97316;">
+                {{ pickup.customer.full_name }}
+            </a>
+            &rsaquo; Pickup
+        </p>
+    </div>
+    <div class="flex gap-3">
+        {% if pickup.status == 'pending' %}
+        <a href="{% url 'scheme:pickup-dispatch' pickup.pk %}"
+           class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700 transition">
+            Dispatch
+        </a>
+        <a href="{% url 'scheme:pickup-cancel' pickup.pk %}"
+           class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded hover:bg-red-600 transition">
+            Cancel
+        </a>
+        {% endif %}
+        {% if pickup.status == 'dispatched' %}
+        <a href="{% url 'scheme:pickup-invoice' pickup.pk %}"
+           class="px-4 py-2 text-sm font-medium text-white rounded transition"
+           style="background-color: #0a1f44;">
+            View Invoice
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="bg-white rounded shadow-sm border border-gray-200 max-w-lg">
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Pickup Information</h2>
+    </div>
+    <div class="px-6 py-5 space-y-3 text-sm">
+        <div class="flex justify-between">
+            <span class="text-gray-500">Customer</span>
+            <span class="font-medium text-gray-800">{{ pickup.customer.full_name }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-500">Product</span>
+            <span class="font-medium text-gray-800">{{ pickup.product.name }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-500">Quantity</span>
+            <span class="font-medium text-gray-800">
+                {{ pickup.quantity }} {{ pickup.product.get_unit_display }}
+            </span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-500">Unit Price</span>
+            <span class="font-medium text-gray-800">UGX {{ pickup.unit_price|floatformat:0 }}</span>
+        </div>
+        <div class="flex justify-between border-t border-gray-100 pt-3">
+            <span class="font-bold text-gray-700">Total Value</span>
+            <span class="font-bold text-lg" style="color: #f97316;">
+                UGX {{ pickup.total_value|floatformat:0 }}
+            </span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-500">Pickup Date</span>
+            <span class="font-medium text-gray-800">{{ pickup.pickup_date }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-500">Status</span>
+            <span class="text-xs px-2 py-1 rounded
+                {% if pickup.status == 'dispatched' %}bg-green-100 text-green-700
+                {% elif pickup.status == 'pending' %}bg-yellow-100 text-yellow-700
+                {% else %}bg-red-100 text-red-700{% endif %}">
+                {{ pickup.status|title }}
+            </span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-gray-500">Processed By</span>
+            <span class="font-medium text-gray-800">{{ pickup.processed_by.get_full_name }}</span>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

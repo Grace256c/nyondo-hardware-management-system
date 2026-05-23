@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Pickup History{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">Pickup History</h1>
+        <p class="text-sm text-gray-500 mt-1">
+            <a href="{% url 'scheme:customer-list' %}" class="hover:underline" style="color: #f97316;">
+                Scheme Customers
+            </a>
+            &rsaquo;
+            <a href="{% url 'scheme:customer-detail' customer.pk %}" class="hover:underline" style="color: #f97316;">
+                {{ customer.full_name }}
+            </a>
+            &rsaquo; Pickups
+        </p>
+    </div>
+    <a href="{% url 'scheme:pickup-create' customer.pk %}"
+       class="px-4 py-2 text-sm font-medium text-white rounded transition"
+       style="background-color: #f97316;">
+        + New Pickup
+    </a>
+</div>
+
+<div class="bg-white rounded shadow-sm border border-gray-200">
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">#</th>
+                <th class="text-left px-6 py-3 font-medium">Product</th>
+                <th class="text-left px-6 py-3 font-medium">Quantity</th>
+                <th class="text-left px-6 py-3 font-medium">Value</th>
+                <th class="text-left px-6 py-3 font-medium">Date</th>
+                <th class="text-left px-6 py-3 font-medium">Status</th>
+                <th class="text-left px-6 py-3 font-medium">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pickup in pickups %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+                <td class="px-6 py-3 text-gray-500">{{ forloop.counter }}</td>
+                <td class="px-6 py-3 font-medium text-gray-800">{{ pickup.product.name }}</td>
+                <td class="px-6 py-3 text-gray-600">
+                    {{ pickup.quantity }} {{ pickup.product.get_unit_display }}
+                </td>
+                <td class="px-6 py-3 text-gray-700">UGX {{ pickup.total_value|floatformat:0 }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ pickup.pickup_date }}</td>
+                <td class="px-6 py-3">
+                    <span class="text-xs px-2 py-1 rounded
+                        {% if pickup.status == 'dispatched' %}bg-green-100 text-green-700
+                        {% elif pickup.status == 'pending' %}bg-yellow-100 text-yellow-700
+                        {% else %}bg-red-100 text-red-700{% endif %}">
+                        {{ pickup.status|title }}
+                    </span>
+                </td>
+                <td class="px-6 py-3 flex gap-3">
+                    <a href="{% url 'scheme:pickup-detail' pickup.pk %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #0a1f44;">View</a>
+                    {% if pickup.status == 'dispatched' %}
+                    <a href="{% url 'scheme:pickup-invoice' pickup.pk %}"
+                       class="text-sm font-medium hover:underline"
+                       style="color: #f97316;">Invoice</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="px-6 py-6 text-center text-gray-400">
+                    No pickups found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

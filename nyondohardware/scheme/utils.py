@@ -1,8 +1,6 @@
 from django.db.models import Sum
 
-
 SCHEME_ALLOWED_CATEGORIES = ['Cement', 'Iron Bars', 'Iron Sheets']
-
 
 def get_customer_balance(customer):
     total_deposits = customer.deposits.filter(
@@ -14,7 +12,6 @@ def get_customer_balance(customer):
     ).aggregate(Sum('total_value'))['total_value__sum'] or 0
 
     return total_deposits - total_pickups
-
 
 def get_scheme_products():
     from stock.models import Product

@@ -9,11 +9,13 @@
         <h1 class="text-2xl font-bold" style="color: #0a1f44;">Products</h1>
         <p class="text-sm text-gray-500 mt-1">All active products and stock levels</p>
     </div>
+    {% if request.user.userprofile.role == 'store_manager' or request.user.userprofile.role == 'admin' %}
     <a href="{% url 'stock:product-create' %}"
        class="px-4 py-2 text-sm font-medium text-white rounded transition"
        style="background-color: #f97316;">
         + Add Product
     </a>
+    {% endif %}
 </div>
 
 <div class="bg-white rounded shadow-sm border border-gray-200">
@@ -40,35 +42,47 @@
                 <td class="px-6 py-3">
                     {% if product.quantity <= product.reorder_level %}
                         <span class="text-xs px-2 py-1 rounded bg-red-100 text-red-700 font-medium">
-                            {{ product.quantity }} — Low
+                            {{ product.quantity|floatformat:0 }} — Low
                         </span>
                     {% elif product.quantity <= product.reorder_level|add:product.reorder_level %}
                         <span class="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700 font-medium">
-                            {{ product.quantity }} — Medium
+                            {{ product.quantity|floatformat:0 }} — Medium
                         </span>
                     {% else %}
                         <span class="text-xs px-2 py-1 rounded bg-green-100 text-green-700 font-medium">
-                            {{ product.quantity }} — Good
+                            {{ product.quantity|floatformat:0 }} — Good
                         </span>
                     {% endif %}
                 </td>
-                <td class="px-6 py-3 text-gray-700">UGX {{ product.retail_price|floatformat:0 }}</td>
-                <td class="px-6 py-3 text-gray-700">UGX {{ product.wholesale_price|floatformat:0 }}</td>
-                <td class="px-6 py-3 flex gap-3">
-                    <a href="{% url 'stock:product-detail' product.pk %}"
-                       class="text-sm font-medium hover:underline"
-                       style="color: #0a1f44;">View</a>
-                    <a href="{% url 'stock:product-update' product.pk %}"
-                       class="text-sm font-medium hover:underline"
-                       style="color: #f97316;">Edit</a>
-                    <a href="{% url 'stock:product-delete' product.pk %}"
-                       class="text-sm font-medium text-red-500 hover:underline">Delete</a>
+                <td class="px-6 py-3 text-gray-700">
+                    UGX {{ product.retail_price|floatformat:0 }}
+                </td>
+                <td class="px-6 py-3 text-gray-700">
+                    UGX {{ product.wholesale_price|floatformat:0 }}
+                </td>
+                <td class="px-6 py-3">
+                    <div class="flex gap-3">
+                        <a href="{% url 'stock:product-detail' product.pk %}"
+                           class="text-sm font-medium hover:underline"
+                           style="color: #0a1f44;">View</a>
+                        {% if request.user.userprofile.role == 'store_manager' or request.user.userprofile.role == 'admin' %}
+                        <a href="{% url 'stock:product-update' product.pk %}"
+                           class="text-sm font-medium hover:underline"
+                           style="color: #f97316;">Edit</a>
+                        {% endif %}
+                        {% if request.user.userprofile.role == 'admin' %}
+                        <a href="{% url 'stock:product-delete' product.pk %}"
+                           class="text-sm font-medium text-red-500 hover:underline">
+                            Deactivate
+                        </a>
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
             {% empty %}
             <tr>
                 <td colspan="8" class="px-6 py-6 text-center text-gray-400">
-                    No products found. Add one to get started.
+                    No products found.
                 </td>
             </tr>
             {% endfor %}

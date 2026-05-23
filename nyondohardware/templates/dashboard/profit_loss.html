@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Profit & Loss{% endblock %}
+
+{% block content %}
+
+<div class="mb-6">
+    <h1 class="text-2xl font-bold" style="color: #0a1f44;">Profit & Loss Report</h1>
+    <p class="text-sm text-gray-500 mt-1">Revenue vs cost of goods sold</p>
+</div>
+
+<!-- FILTER -->
+<div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4 mb-6">
+    <form method="GET" class="flex items-end gap-4">
+        <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Date From</label>
+            <input type="date" name="date_from" value="{{ date_from|default:'' }}"
+                   class="border border-gray-300 rounded px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Date To</label>
+            <input type="date" name="date_to" value="{{ date_to|default:'' }}"
+                   class="border border-gray-300 rounded px-3 py-2 text-sm">
+        </div>
+        <button type="submit"
+                class="px-4 py-2 text-sm font-medium text-white rounded transition"
+                style="background-color: #f97316;">
+            Filter
+        </button>
+        <a href="{% url 'dashboard:profit-loss' %}"
+           class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition">
+            Clear
+        </a>
+    </form>
+</div>
+
+<!-- SUMMARY CARDS -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Revenue</p>
+        <p class="text-2xl font-bold" style="color: #0a1f44;">
+            UGX {{ total_revenue|floatformat:0 }}
+        </p>
+    </div>
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Cost</p>
+        <p class="text-2xl font-bold text-red-500">
+            UGX {{ total_cost|floatformat:0 }}
+        </p>
+    </div>
+    <div class="bg-white rounded shadow-sm border border-gray-200 px-6 py-4">
+        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Gross Profit</p>
+        <p class="text-2xl font-bold {% if gross_profit >= 0 %}text-green-600{% else %}text-red-500{% endif %}">
+            UGX {{ gross_profit|floatformat:0 }}
+        </p>
+    </div>
+</div>
+
+<!-- P&L TABLE -->
+<div class="bg-white rounded shadow-sm border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Per Product Breakdown</h2>
+    </div>
+    <table class="w-full text-sm">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-6 py-3 font-medium">Product</th>
+                <th class="text-left px-6 py-3 font-medium">Qty Sold</th>
+                <th class="text-left px-6 py-3 font-medium">Revenue</th>
+                <th class="text-left px-6 py-3 font-medium">Cost</th>
+                <th class="text-left px-6 py-3 font-medium">Profit</th>
+                <th class="text-left px-6 py-3 font-medium">Margin %</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in product_stats %}
+            <tr class="border-t border-gray-100 hover:bg-gray-50">
+                <td class="px-6 py-3 font-medium text-gray-800">{{ stat.product__name }}</td>
+                <td class="px-6 py-3 text-gray-600">{{ stat.qty_sold|floatformat:0 }}</td>
+                <td class="px-6 py-3 text-gray-700">UGX {{ stat.total_revenue|floatformat:0 }}</td>
+                <td class="px-6 py-3 text-red-500">UGX {{ stat.total_cost|floatformat:0 }}</td>
+                <td class="px-6 py-3 font-medium
+                    {% if stat.gross_profit >= 0 %}text-green-600{% else %}text-red-500{% endif %}">
+                    UGX {{ stat.gross_profit|floatformat:0 }}
+                </td>
+                <td class="px-6 py-3 text-gray-600">{{ stat.margin|floatformat:1 }}%</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="px-6 py-6 text-center text-gray-400">
+                    No sales data found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

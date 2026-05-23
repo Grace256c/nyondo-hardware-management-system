@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheme Invoice - {{ invoice.invoice_number }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body class="bg-white p-8 max-w-2xl mx-auto">
+
+    <div class="no-print mb-6 flex gap-3">
+        <button onclick="window.print()"
+                class="px-4 py-2 text-sm font-medium text-white rounded"
+                style="background-color: #f97316;">
+            Print Invoice
+        </button>
+        <a href="{% url 'scheme:pickup-detail' pickup.pk %}"
+           class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded">
+            Back
+        </a>
+    </div>
+
+    <!-- HEADER -->
+    <div class="text-center mb-8 border-b pb-6">
+        <h1 class="text-2xl font-bold" style="color: #0a1f44;">NYONDO GENERAL HARDWARE LTD</h1>
+        <p class="text-sm text-gray-500">Nansana, Uganda</p>
+    </div>
+
+    <!-- INVOICE TITLE -->
+    <div class="text-center mb-6">
+        <h2 class="text-lg font-bold uppercase tracking-widest" style="color: #0a1f44;">
+            Scheme Invoice
+        </h2>
+        <p class="text-sm text-gray-500">{{ invoice.invoice_number }}</p>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="grid grid-cols-2 gap-6 mb-8 text-sm">
+        <div class="space-y-2">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Invoice No.:</span>
+                <span class="font-medium">{{ invoice.invoice_number }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Date:</span>
+                <span class="font-medium">{{ invoice.issue_date }}</span>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Customer:</span>
+                <span class="font-medium">{{ invoice.customer.full_name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">NIN:</span>
+                <span class="font-medium">{{ invoice.customer.nin }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">Phone:</span>
+                <span class="font-medium">{{ invoice.customer.phone }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ITEMS TABLE -->
+    <table class="w-full text-sm mb-8 border border-gray-200">
+        <thead>
+            <tr style="background-color: #0a1f44; color: white;">
+                <th class="text-left px-4 py-3 font-medium">Product</th>
+                <th class="text-left px-4 py-3 font-medium">Unit</th>
+                <th class="text-right px-4 py-3 font-medium">Quantity</th>
+                <th class="text-right px-4 py-3 font-medium">Unit Price</th>
+                <th class="text-right px-4 py-3 font-medium">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="border-t border-gray-200">
+                <td class="px-4 py-3">{{ pickup.product.name }}</td>
+                <td class="px-4 py-3">{{ pickup.product.get_unit_display }}</td>
+                <td class="px-4 py-3 text-right">{{ pickup.quantity }}</td>
+                <td class="px-4 py-3 text-right">UGX {{ pickup.unit_price|floatformat:0 }}</td>
+                <td class="px-4 py-3 text-right font-medium">
+                    UGX {{ pickup.total_value|floatformat:0 }}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr class="border-t-2 border-gray-300">
+                <td colspan="4" class="px-4 py-3 text-right font-bold">Total:</td>
+                <td class="px-4 py-3 text-right font-bold" style="color: #0a1f44;">
+                    UGX {{ invoice.total_value|floatformat:0 }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- SIGNATURES -->
+    <div class="grid grid-cols-2 gap-12 mt-12 text-sm">
+        <div>
+            <div class="border-t border-gray-400 pt-2">
+                <p class="text-gray-600">Issued By</p>
+                <p class="text-gray-400 text-xs mt-1">Name & Signature</p>
+            </div>
+        </div>
+        <div>
+            <div class="border-t border-gray-400 pt-2">
+                <p class="text-gray-600">Goods received in good condition</p>
+                <p class="text-gray-400 text-xs mt-1">Customer Signature</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 text-center text-xs text-gray-400 border-t pt-4">
+        <p>NYONDO Hardware LTD &mdash; Nansana, Uganda</p>
+    </div>
+
+</body>
+</html>

@@ -73,12 +73,23 @@ class SchemeCustomerEditForm(forms.ModelForm):
 class DepositForm(forms.ModelForm):
 
     class Meta:
-        model  = Deposit
-        fields = ['amount', 'payment_date', 'payment_method']
+        model   = Deposit
+        fields  = ['amount', 'payment_date', 'payment_method']
+        widgets = {
+            'payment_date': forms.DateInput(
+                attrs={'type': 'date',
+                       'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm'}
+            ),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         style_fields(self)
+        # Re-apply date input after style_fields
+        self.fields['payment_date'].widget = forms.DateInput(
+            attrs={'type': 'date',
+                   'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm'}
+        )
 
     def clean_amount(self):
         amount = self.cleaned_data.get('amount')
@@ -90,13 +101,24 @@ class DepositForm(forms.ModelForm):
 class PickupForm(forms.ModelForm):
 
     class Meta:
-        model  = Pickup
-        fields = ['product', 'quantity', 'unit_price', 'pickup_date']
+        model   = Pickup
+        fields  = ['product', 'quantity', 'unit_price', 'pickup_date']
+        widgets = {
+            'pickup_date': forms.DateInput(
+                attrs={'type': 'date',
+                       'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm'}
+            ),
+        }
 
     def __init__(self, *args, **kwargs):
         self.customer = kwargs.pop('customer', None)
         super().__init__(*args, **kwargs)
         style_fields(self)
+        # Re-apply date input after style_fields
+        self.fields['pickup_date'].widget = forms.DateInput(
+            attrs={'type': 'date',
+                   'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm'}
+        )
         self.fields['product'].queryset = get_scheme_products()
 
     def clean(self):
