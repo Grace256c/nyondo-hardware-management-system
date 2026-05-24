@@ -7,7 +7,9 @@
 <div class="flex items-center justify-between mb-6">
     <div>
         <h1 class="text-2xl font-bold" style="color: #0a1f44;">Customers</h1>
-        <p class="text-sm text-gray-500 mt-1">Manage your customers</p>
+        <p class="text-sm text-gray-500 mt-1">
+            Registered repeat customers. Walk-in customers are added directly on the invoice.
+        </p>
     </div>
     <a href="{% url 'sales:customer-create' %}"
        class="px-4 py-2 text-sm font-medium text-white rounded transition"
@@ -43,21 +45,27 @@
                     </span>
                 </td>
                 <td class="px-6 py-3 text-gray-600">{{ customer.distance_km }} km</td>
-                <td class="px-6 py-3 flex gap-3">
-                    <a href="{% url 'sales:customer-detail' customer.pk %}"
-                       class="text-sm font-medium hover:underline"
-                       style="color: #0a1f44;">View</a>
-                    <a href="{% url 'sales:customer-update' customer.pk %}"
-                       class="text-sm font-medium hover:underline"
-                       style="color: #f97316;">Edit</a>
-                    <a href="{% url 'sales:customer-delete' customer.pk %}"
-                       class="text-sm font-medium text-red-500 hover:underline">Delete</a>
+                <td class="px-6 py-3">
+                    <div class="flex gap-3">
+                        <a href="{% url 'sales:customer-detail' customer.pk %}"
+                           class="text-sm font-medium hover:underline"
+                           style="color: #0a1f44;">View</a>
+                        <a href="{% url 'sales:customer-update' customer.pk %}"
+                           class="text-sm font-medium hover:underline"
+                           style="color: #f97316;">Edit</a>
+                        {% if request.user.userprofile.role == 'admin' %}
+                        <a href="{% url 'sales:customer-delete' customer.pk %}"
+                           class="text-sm font-medium text-red-500 hover:underline">
+                            Deactivate
+                        </a>
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
             {% empty %}
             <tr>
                 <td colspan="6" class="px-6 py-6 text-center text-gray-400">
-                    No customers found. Add one to get started.
+                    No customers registered yet.
                 </td>
             </tr>
             {% endfor %}

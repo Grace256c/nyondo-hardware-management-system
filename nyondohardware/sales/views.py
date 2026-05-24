@@ -77,57 +77,129 @@ def invoice_list(request):
 @sales_required
 def invoice_create(request):
     if request.method == 'POST':
-        form = InvoiceForm(request.POST)
-        if form.is_valid():
-            invoice           = form.save(commit=False)
-            invoice.served_by = request.user
+        # Get form data
+        customer_id    = request.POST.get('customer')
+        customer_name  = request.POST.get('customer_name', '').strip()
+        customer_type  = request.POST.get('customer_type', 'walk_in')
+        payment_method = request.POST.get('payment_method')
+        payment_status = request.POST.get('payment_status', 'paid')
+        amount_paid    = request.POST.get('amount_paid', 0)
+        notes          = request.POST.get('notes', '')
+        products       = request.POST.getlist('product')
+        quantities     = request.POST.getlist('quantity')
+        prices         = request.POST.getlist('unit_price')
 
-            # Get all product rows from POST
-            products   = request.POST.getlist('product')
-            quantities = request.POST.getlist('quantity')
-            prices     = request.POST.getlist('unit_price')
+        # ── DJANGO VALIDATIONS ──────────────────────────────
+        errors = []
 
-            # Validate at least one product
-            if not any(products):
-                messages.error(request, 'Please add at least one product.')
-                return render(request, 'sales/invoice_create.html', {'form': form})
+        # Validate customer
+        if not customer_id and not customer_name:
+            errors.append('Please select a customer or enter a walk-in customer name.')
 
-            # Calculate subtotal
-            subtotal = 0
-            for i in range(len(products)):
-                if products[i] and quantities[i] and prices[i]:
-                    subtotal += float(quantities[i]) * float(prices[i])
+        # Validate payment method
+        if not payment_method:
+            errors.append('Please select a payment method.')
 
-            invoice.subtotal = subtotal
-            invoice.save()
-
-            # Save invoice items
-            for i in range(len(products)):
-                if products[i] and quantities[i] and prices[i]:
+        # Validate products
+        valid_items = []
+        for i in range(len(products)):
+            if products[i] and quantities[i] and prices[i]:
+                try:
                     from stock.models import Product
-                    product = Product.objects.get(pk=products[i])
-                    InvoiceItem.objects.create(
-                        invoice    = invoice,
-                        product    = product,
-                        quantity   = quantities[i],
-                        unit_price = prices[i],
-                    )
+                    product  = Product.objects.get(pk=products[i])
+                    qty      = float(quantities[i])
+                    price    = float(prices[i])
 
-            messages.success(request, f'Invoice {invoice.invoice_number} created successfully.')
-            return redirect('sales:invoice-detail', pk=invoice.pk)
+                    if qty <= 0:
+                        errors.append(f'{product.name}: Quantity must be greater than 0.')
+                    elif qty > float(product.quantity):
+                        errors.append(
+                            f'{product.name}: Not enough stock. '
+                            f'Available: {product.quantity}'
+                        )
+                    elif price <= 0:
+                        errors.append(f'{product.name}: Unit price must be greater than 0.')
+                    else:
+                        valid_items.append({
+                            'product' : product,
+                            'quantity': qty,
+                            'price'   : price,
+                        })
+                except Exception as e:
+                    errors.append(f'Invalid product selected.')
+
+        if not valid_items:
+            errors.append('Please add at least one product.')
+
+        # Validate amount paid
+        try:
+            amount_paid = float(amount_paid)
+            if amount_paid < 0:
+                errors.append('Amount paid cannot be negative.')
+        except ValueError:
+            errors.append('Invalid amount paid.')
+            amount_paid = 0
+
+        # If errors show them
+        if errors:
+            from stock.models import Product as P
+            for error in errors:
+                messages.error(request, error)
+            return render(request, 'sales/invoice_create.html', {
+                'form'     : InvoiceForm(),
+                'products' : P.objects.filter(is_active=True),
+                'customers': Customer.objects.filter(is_active=True),
+            })
+
+        # ── SAVE INVOICE ────────────────────────────────────
+        # Calculate subtotal
+        subtotal = sum(item['quantity'] * item['price'] for item in valid_items)
+
+        # Get customer
+        customer = None
+        if customer_id:
+            try:
+                customer = Customer.objects.get(pk=customer_id)
+                customer_name = customer.name
+                customer_type = customer.customer_type
+            except Customer.DoesNotExist:
+                pass
+
+        # Create invoice
+        invoice = Invoice.objects.create(
+            customer       = customer,
+            customer_name  = customer_name,
+            customer_type  = customer_type,
+            payment_method = payment_method,
+            payment_status = payment_status,
+            subtotal       = subtotal,
+            amount_paid    = amount_paid,
+            notes          = notes,
+            served_by      = request.user,
+        )
+
+        # Save invoice items
+        for item in valid_items:
+            InvoiceItem.objects.create(
+                invoice    = invoice,
+                product    = item['product'],
+                quantity   = item['quantity'],
+                unit_price = item['price'],
+            )
+
+        messages.success(request, f'Invoice {invoice.invoice_number} created successfully.')
+        return redirect('sales:invoice-detail', pk=invoice.pk)
+
     else:
-        form = InvoiceForm()
-
-    from stock.models import Product
-    products = Product.objects.filter(is_active=True)
-    customers = Customer.objects.filter(is_active=True)
-    return render(request, 'sales/invoice_create.html', {
-        'form'     : form,
-        'products' : products,
-        'customers': customers,
-    })
-
-
+        from stock.models import Product
+        form      = InvoiceForm()
+        products  = Product.objects.filter(is_active=True)
+        customers = Customer.objects.filter(is_active=True)
+        return render(request, 'sales/invoice_create.html', {
+            'form'     : form,
+            'products' : products,
+            'customers': customers,
+        })
 @sales_required
 def invoice_detail(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)

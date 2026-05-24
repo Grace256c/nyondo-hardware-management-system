@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from stock.models import Product
+from decimal import Decimal
 
 
 class Customer(models.Model):
@@ -78,13 +79,13 @@ class Invoice(models.Model):
         # Calculate transport
         from .utils import calculate_transport
         if self.customer and self.customer.distance_km:
-            self.transport_charge = calculate_transport(
+            self.transport_charge = Decimal(str(calculate_transport(
                 self.customer.distance_km, self.subtotal
-            )
+            )))
 
         # Calculate total and balance
-        self.total   = self.subtotal + self.transport_charge
-        self.balance = self.total - self.amount_paid
+        self.total   = Decimal(str(self.subtotal)) + Decimal(str(self.transport_charge))
+        self.balance = Decimal(str(self.total)) - Decimal(str(self.amount_paid))
 
         super().save(*args, **kwargs)
 
@@ -101,11 +102,14 @@ class InvoiceItem(models.Model):
     total_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     def save(self, *args, **kwargs):
+        qty   = Decimal(str(self.quantity))
+        price = Decimal(str(self.unit_price))
+
         # Calculate total price
-        self.total_price = self.quantity * self.unit_price
+        self.total_price = qty * price
 
         # Check stock availability
-        if self.quantity > self.product.quantity:
+        if qty > self.product.quantity:
             from django.core.exceptions import ValidationError
             raise ValidationError(
                 f'Not enough stock for {self.product.name}. '
@@ -117,7 +121,7 @@ class InvoiceItem(models.Model):
 
         # Deduct stock
         if is_new:
-            self.product.quantity -= self.quantity
+            self.product.quantity -= qty
             self.product.save()
 
     def __str__(self):
@@ -127,9 +131,9 @@ class InvoiceItem(models.Model):
 class Receivable(models.Model):
 
     STATUS_CHOICES = [
-        ('unpaid',     'Unpaid'),
-        ('partial',    'Partial'),
-        ('paid',       'Paid'),
+        ('unpaid',      'Unpaid'),
+        ('partial',     'Partial'),
+        ('paid',        'Paid'),
         ('written_off', 'Written Off'),
     ]
 

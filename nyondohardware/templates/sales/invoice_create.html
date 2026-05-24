@@ -14,7 +14,7 @@
     </p>
 </div>
 
-<form method="POST">
+<form method="POST" id="invoice-form">
     {% csrf_token %}
 
     <div class="grid grid-cols-3 gap-6">
@@ -31,11 +31,11 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Select Customer
+                            Select Existing Customer
                         </label>
                         <select name="customer" id="customer-select"
                                 style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:8px 12px; font-size:14px; background:white;">
-                            <option value="">-- Walk-in / No customer --</option>
+                            <option value="">-- Walk-in / New Customer --</option>
                             {% for customer in customers %}
                             <option value="{{ customer.pk }}"
                                     data-type="{{ customer.customer_type }}"
@@ -44,27 +44,41 @@
                             </option>
                             {% endfor %}
                         </select>
+                        <p class="text-xs text-gray-400 mt-1">
+                            Leave blank for walk-in or new customer
+                        </p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Or enter name (walk-in)
+                            Customer Name
                         </label>
-                        <input type="text" name="customer_name"
-                               placeholder="Walk-in customer name"
+                        <input type="text" name="customer_name" id="customer-name"
+                               placeholder="Type customer name"
                                style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:8px 12px; font-size:14px;">
+                        <p class="text-xs text-gray-400 mt-1">
+                            Required for walk-in customers
+                        </p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                             Customer Type <span class="text-red-500">*</span>
                         </label>
-                        <select name="customer_type"
+                        <select name="customer_type" id="customer-type"
                                 style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:8px 12px; font-size:14px; background:white;">
                             <option value="retail">Retail</option>
                             <option value="wholesale">Wholesale</option>
                             <option value="walk_in">Walk In</option>
                         </select>
+                    </div>
+
+                    <!-- TRANSPORT INFO -->
+                    <div class="bg-blue-50 border border-blue-100 rounded px-3 py-2 text-xs text-blue-700">
+                        <p class="font-medium mb-1">Transport Rule:</p>
+                        <p>✓ Free delivery within 10km for orders above UGX 500,000</p>
+                        <p>✗ Otherwise UGX 30,000 charge applies</p>
+                        <p class="mt-1">Customer distance: <span id="distance-display">Not set</span></p>
                     </div>
 
                 </div>
@@ -95,26 +109,27 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                             Payment Status <span class="text-red-500">*</span>
                         </label>
-                        <select name="payment_status"
+                        <select name="payment_status" id="payment-status"
                                 style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:8px 12px; font-size:14px; background:white;">
-                            <option value="paid">Paid</option>
-                            <option value="credit">Credit</option>
-                            <option value="partial">Partial</option>
+                            <option value="paid">Paid — Full payment received</option>
+                            <option value="credit">Credit — Pay later</option>
+                            <option value="partial">Partial — Part payment now</option>
                         </select>
                     </div>
 
-                    <div>
+                    <div id="amount-paid-section">
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                             Amount Paid (UGX)
                         </label>
-                        <input type="number" name="amount_paid" value="0"
+                        <input type="number" name="amount_paid" id="amount-paid" value="0"
                                style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:8px 12px; font-size:14px;">
+                        <p class="text-xs text-gray-400 mt-1">
+                            Enter amount received. Leave 0 if full credit.
+                        </p>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Notes
-                        </label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                         <textarea name="notes" rows="2"
                                   style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:8px 12px; font-size:14px;"></textarea>
                     </div>
@@ -139,16 +154,16 @@
                         <thead>
                             <tr class="text-left text-gray-500 border-b border-gray-100">
                                 <th class="pb-2 font-medium">Product</th>
-                                <th class="pb-2 font-medium">Qty</th>
-                                <th class="pb-2 font-medium">Unit Price</th>
-                                <th class="pb-2 font-medium">Total</th>
-                                <th class="pb-2"></th>
+                                <th class="pb-2 font-medium w-24">Qty</th>
+                                <th class="pb-2 font-medium w-32">Unit Price</th>
+                                <th class="pb-2 font-medium w-32">Total</th>
+                                <th class="pb-2 w-8"></th>
                             </tr>
                         </thead>
                         <tbody id="items-body">
                             <tr class="item-row">
                                 <td class="py-2 pr-2">
-                                    <select name="product"
+                                    <select name="product" class="product-select"
                                             style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:6px 8px; font-size:13px; background:white;">
                                         <option value="">-- Select Product --</option>
                                         {% for product in products %}
@@ -156,23 +171,25 @@
                                                 data-retail="{{ product.retail_price }}"
                                                 data-wholesale="{{ product.wholesale_price }}"
                                                 data-stock="{{ product.quantity }}">
-                                            {{ product.name }} (Stock: {{ product.quantity }})
+                                            {{ product.name }} (Stock: {{ product.quantity|floatformat:0 }})
                                         </option>
                                         {% endfor %}
                                     </select>
                                 </td>
                                 <td class="py-2 pr-2">
                                     <input type="number" name="quantity" value="1" min="1"
+                                           class="qty-input"
                                            style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:6px 8px; font-size:13px;">
                                 </td>
                                 <td class="py-2 pr-2">
                                     <input type="number" name="unit_price" value="0"
+                                           class="price-input"
                                            style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:6px 8px; font-size:13px;">
                                 </td>
-                                <td class="py-2 pr-2 row-total text-gray-700">UGX 0</td>
+                                <td class="py-2 pr-2 row-total text-gray-700 font-medium">UGX 0</td>
                                 <td class="py-2">
                                     <button type="button" onclick="removeRow(this)"
-                                            class="text-red-400 hover:text-red-600 text-xs">✕</button>
+                                            class="text-red-400 hover:text-red-600 font-bold">✕</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -186,11 +203,20 @@
                         </div>
                         <div class="flex justify-between text-gray-600">
                             <span>Transport</span>
-                            <span id="transport">UGX 0</span>
+                            <span id="transport-display">UGX 0</span>
                         </div>
-                        <div class="flex justify-between font-bold text-base border-t border-gray-200 pt-2" style="color: #0a1f44;">
+                        <div class="flex justify-between font-bold text-base border-t border-gray-200 pt-2"
+                             style="color: #0a1f44;">
                             <span>Total</span>
                             <span id="grand-total">UGX 0</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Amount Paid</span>
+                            <span id="amount-paid-display">UGX 0</span>
+                        </div>
+                        <div class="flex justify-between font-medium text-orange-600">
+                            <span>Balance</span>
+                            <span id="balance-display">UGX 0</span>
                         </div>
                     </div>
                 </div>
@@ -212,47 +238,132 @@
     </div>
 </form>
 
+{% endblock %}
+
+{% block scripts %}
 <script>
-function addRow() {
-    var tbody = document.getElementById('items-body');
-    var firstRow = tbody.querySelector('.item-row');
-    var newRow = firstRow.cloneNode(true);
-    newRow.querySelectorAll('input').forEach(function(input) {
-        if (input.name === 'quantity') input.value = 1;
-        if (input.name === 'unit_price') input.value = 0;
-    });
-    newRow.querySelector('select').selectedIndex = 0;
-    newRow.querySelector('.row-total').textContent = 'UGX 0';
-    tbody.appendChild(newRow);
-}
+    // Customer selection — auto fill type and show distance
+    document.getElementById('customer-select').addEventListener('change', function() {
+        var option = this.options[this.selectedIndex];
+        var type = option.getAttribute('data-type');
+        var distance = option.getAttribute('data-distance');
 
-function removeRow(btn) {
-    var tbody = document.getElementById('items-body');
-    if (tbody.querySelectorAll('.item-row').length > 1) {
-        btn.closest('.item-row').remove();
+        if (type) {
+            document.getElementById('customer-type').value = type;
+        }
+        if (distance) {
+            document.getElementById('distance-display').textContent = distance + ' km';
+        } else {
+            document.getElementById('distance-display').textContent = 'Not set';
+        }
         updateTotals();
-    }
-}
+    });
 
-function updateTotals() {
-    var rows = document.querySelectorAll('.item-row');
-    var subtotal = 0;
-    rows.forEach(function(row) {
-        var qty = parseFloat(row.querySelector('[name="quantity"]').value) || 0;
-        var price = parseFloat(row.querySelector('[name="unit_price"]').value) || 0;
+    // Product selection — auto fill price based on customer type
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('product-select')) {
+            var option = e.target.options[e.target.selectedIndex];
+            var customerType = document.getElementById('customer-type').value;
+            var price = customerType === 'wholesale'
+                ? option.getAttribute('data-wholesale')
+                : option.getAttribute('data-retail');
+
+            if (price) {
+                var row = e.target.closest('.item-row');
+                row.querySelector('.price-input').value = price;
+                updateRowTotal(row);
+                updateTotals();
+            }
+        }
+
+        if (e.target.classList.contains('qty-input') || e.target.classList.contains('price-input')) {
+            var row = e.target.closest('.item-row');
+            updateRowTotal(row);
+            updateTotals();
+        }
+
+        if (e.target.id === 'customer-type') {
+            // Re-apply prices when customer type changes
+            document.querySelectorAll('.item-row').forEach(function(row) {
+                var select = row.querySelector('.product-select');
+                var option = select.options[select.selectedIndex];
+                var customerType = document.getElementById('customer-type').value;
+                var price = customerType === 'wholesale'
+                    ? option.getAttribute('data-wholesale')
+                    : option.getAttribute('data-retail');
+                if (price) {
+                    row.querySelector('.price-input').value = price;
+                    updateRowTotal(row);
+                }
+            });
+            updateTotals();
+        }
+
+        if (e.target.id === 'amount-paid') {
+            updateTotals();
+        }
+    });
+
+    function updateRowTotal(row) {
+        var qty   = parseFloat(row.querySelector('.qty-input').value) || 0;
+        var price = parseFloat(row.querySelector('.price-input').value) || 0;
         var total = qty * price;
         row.querySelector('.row-total').textContent = 'UGX ' + total.toLocaleString();
-        subtotal += total;
-    });
-    document.getElementById('subtotal').textContent = 'UGX ' + subtotal.toLocaleString();
-    document.getElementById('grand-total').textContent = 'UGX ' + subtotal.toLocaleString();
-}
-
-document.addEventListener('input', function(e) {
-    if (e.target.name === 'quantity' || e.target.name === 'unit_price') {
-        updateTotals();
+        return total;
     }
-});
-</script>
 
+    function updateTotals() {
+        var subtotal = 0;
+        document.querySelectorAll('.item-row').forEach(function(row) {
+            subtotal += updateRowTotal(row);
+        });
+
+        // Transport calculation
+        var distance = parseFloat(
+            document.getElementById('customer-select')
+            .options[document.getElementById('customer-select').selectedIndex]
+            .getAttribute('data-distance')
+        ) || 0;
+
+        var transport = 0;
+        if (distance > 0) {
+            if (distance <= 10 && subtotal >= 500000) {
+                transport = 0;
+            } else {
+                transport = 30000;
+            }
+        }
+
+        var grandTotal  = subtotal + transport;
+        var amountPaid  = parseFloat(document.getElementById('amount-paid').value) || 0;
+        var balance     = grandTotal - amountPaid;
+
+        document.getElementById('subtotal').textContent         = 'UGX ' + subtotal.toLocaleString();
+        document.getElementById('transport-display').textContent = transport === 0 && distance > 0
+            ? 'UGX 0 (Free)'
+            : 'UGX ' + transport.toLocaleString();
+        document.getElementById('grand-total').textContent      = 'UGX ' + grandTotal.toLocaleString();
+        document.getElementById('amount-paid-display').textContent = 'UGX ' + amountPaid.toLocaleString();
+        document.getElementById('balance-display').textContent  = 'UGX ' + balance.toLocaleString();
+    }
+
+    function addRow() {
+        var tbody  = document.getElementById('items-body');
+        var first  = tbody.querySelector('.item-row');
+        var newRow = first.cloneNode(true);
+        newRow.querySelector('.qty-input').value   = 1;
+        newRow.querySelector('.price-input').value = 0;
+        newRow.querySelector('.product-select').selectedIndex = 0;
+        newRow.querySelector('.row-total').textContent = 'UGX 0';
+        tbody.appendChild(newRow);
+    }
+
+    function removeRow(btn) {
+        var tbody = document.getElementById('items-body');
+        if (tbody.querySelectorAll('.item-row').length > 1) {
+            btn.closest('.item-row').remove();
+            updateTotals();
+        }
+    }
+</script>
 {% endblock %}
