@@ -1,158 +1,182 @@
-{% extends 'base.html' %} {% block title %}New Pickup{% endblock %} {% block
-content %}
+{% extends 'base.html' %}
+
+{% block title %}New Pickup{% endblock %}
+
+{% block content %}
 
 <div class="mb-6">
-  <h1 class="text-2xl font-bold" style="color: #0a1f44">New Pickup</h1>
-  <p class="text-sm text-gray-500 mt-1">
-    <a
-      href="{% url 'scheme:customer-list' %}"
-      class="hover:underline"
-      style="color: #f97316"
-    >
-      Scheme Customers
-    </a>
-    &rsaquo;
-    <a
-      href="{% url 'scheme:customer-detail' customer.pk %}"
-      class="hover:underline"
-      style="color: #f97316"
-    >
-      {{ customer.full_name }}
-    </a>
-    &rsaquo; New Pickup
-  </p>
+    <h1 class="text-2xl font-bold" style="color: #0a1f44;">New Pickup</h1>
+    <p class="text-sm text-gray-500 mt-1">
+        <a href="{% url 'scheme:customer-list' %}" class="hover:underline" style="color: #f97316;">
+            Scheme Customers
+        </a>
+        &rsaquo;
+        <a href="{% url 'scheme:customer-detail' customer.pk %}" class="hover:underline" style="color: #f97316;">
+            {{ customer.full_name }}
+        </a>
+        &rsaquo; New Pickup
+    </p>
 </div>
 
 <!-- BALANCE CARD -->
 <div class="bg-white rounded shadow-sm border border-gray-200 max-w-lg mb-4">
-  <div class="px-6 py-4 flex items-center justify-between">
-    <div>
-      <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">
-        Available Balance
-      </p>
-      <p class="text-2xl font-bold" style="color: #f97316">
-        UGX {{ balance|floatformat:0 }}
-      </p>
+    <div class="px-6 py-4 flex items-center justify-between">
+        <div>
+            <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Available Balance</p>
+            <p class="text-2xl font-bold" style="color: #f97316;">
+                UGX {{ balance|floatformat:0 }}
+            </p>
+        </div>
+        <div>
+            <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Customer</p>
+            <p class="text-sm font-medium text-gray-800">{{ customer.full_name }}</p>
+        </div>
     </div>
-    <div>
-      <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Customer</p>
-      <p class="text-sm font-medium text-gray-800">{{ customer.full_name }}</p>
-    </div>
-  </div>
 </div>
 
 {% if balance <= 0 %}
-<div
-  class="bg-red-50 border border-red-200 rounded px-4 py-3 mb-4 text-sm text-red-700 max-w-lg"
->
-  This customer has no balance. They need to make a deposit first.
+<div class="bg-red-50 border border-red-200 rounded px-4 py-3 mb-4 text-sm text-red-700 max-w-lg">
+    This customer has no balance. They need to make a deposit first.
 </div>
 {% endif %}
 
-<!-- PICKUP FORM -->
 <div class="bg-white rounded shadow-sm border border-gray-200 max-w-lg">
-  <div class="px-6 py-4 border-b border-gray-100">
-    <h2 class="text-sm font-semibold text-gray-700">Pickup Details</h2>
-    <p class="text-xs text-gray-400 mt-1">
-      Only cement, iron bars and iron sheets are available under this scheme.
-    </p>
-  </div>
-  <form method="POST" class="px-6 py-5 space-y-4">
-    {% csrf_token %}
-
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">
-        Product <span class="text-red-500">*</span>
-      </label>
-      <select
-        name="product"
-        style="
-          width: 100%;
-          border: 1px solid #d1d5db;
-          border-radius: 4px;
-          padding: 8px 12px;
-          font-size: 14px;
-          background: white;
-        "
-      >
-        <option value="">-- Select Product --</option>
-        {% for product in form.product.field.queryset %}
-        <option
-          value="{{ product.pk }}"
-          data-price="{{ product.retail_price }}"
-        >
-          {{ product.name }} — UGX {{ product.retail_price|floatformat:0 }}
-        </option>
-        {% endfor %}
-      </select>
-      <p class="text-red-500 text-xs mt-1">{{ form.product.errors.0 }}</p>
-      {% endif %}
+    <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-sm font-semibold text-gray-700">Pickup Details</h2>
+        <p class="text-xs text-gray-400 mt-1">
+            Only cement, iron bars and iron sheets are available under this scheme.
+        </p>
     </div>
+    <form method="POST" class="px-6 py-5 space-y-4">
+        {% csrf_token %}
 
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Quantity <span class="text-red-500">*</span>
-        </label>
-        {{ form.quantity }} {% if form.quantity.errors %}
-        <p class="text-red-500 text-xs mt-1">{{ form.quantity.errors.0 }}</p>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Product <span class="text-red-500">*</span>
+            </label>
+            <select name="product" id="product-select"
+                    style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:8px 12px; font-size:14px; background:white;">
+                <option value="">-- Select Product --</option>
+                {% for product in form.product.field.queryset %}
+                <option value="{{ product.pk }}"
+                        data-price="{{ product.retail_price }}">
+                    {{ product.name }} — UGX {{ product.retail_price|floatformat:0 }}
+                    (Stock: {{ product.quantity|floatformat:0 }})
+                </option>
+                {% endfor %}
+            </select>
+            {% if form.product.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.product.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Quantity <span class="text-red-500">*</span>
+                </label>
+                <input type="number" name="quantity" id="quantity-input"
+                       value="1" min="1"
+                       style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:8px 12px; font-size:14px;">
+                {% if form.quantity.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.quantity.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Unit Price (UGX) <span class="text-red-500">*</span>
+                </label>
+                <input type="number" name="unit_price" id="unit-price-input"
+                       value="0" readonly
+                       style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:8px 12px; font-size:14px; background:#f9fafb;">
+                {% if form.unit_price.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.unit_price.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- LIVE TOTAL VALUE -->
+        <div class="bg-gray-50 rounded px-4 py-3 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-600">Total Value</span>
+                <span id="total-value" class="font-bold" style="color: #0a1f44;">UGX 0</span>
+            </div>
+            <div class="flex justify-between mt-1">
+                <span class="text-gray-600">Available Balance</span>
+                <span class="font-medium text-green-600">UGX {{ balance|floatformat:0 }}</span>
+            </div>
+            <div id="balance-warning" class="text-red-500 text-xs mt-2 hidden">
+                Total value exceeds available balance!
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Pickup Date <span class="text-red-500">*</span>
+            </label>
+            <input type="date" name="pickup_date"
+                   style="width:100%; border:1px solid #d1d5db; border-radius:4px; padding:8px 12px; font-size:14px;">
+            {% if form.pickup_date.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ form.pickup_date.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="bg-red-50 border border-red-200 rounded px-4 py-3 text-sm text-red-700">
+                {{ form.non_field_errors }}
+            </div>
         {% endif %}
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Unit Price (UGX) <span class="text-red-500">*</span>
-        </label>
-        {{ form.unit_price }} {% if form.unit_price.errors %}
-        <p class="text-red-500 text-xs mt-1">{{ form.unit_price.errors.0 }}</p>
-        {% endif %}
-      </div>
-    </div>
 
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">
-        Pickup Date <span class="text-red-500">*</span>
-      </label>
-      {{ form.pickup_date }} {% if form.pickup_date.errors %}
-      <p class="text-red-500 text-xs mt-1">{{ form.pickup_date.errors.0 }}</p>
-      {% endif %}
-    </div>
-
-    {% if form.non_field_errors %}
-    <div
-      class="bg-red-50 border border-red-200 rounded px-4 py-3 text-sm text-red-700"
-    >
-      {{ form.non_field_errors }}
-    </div>
-    {% endif %}
-
-    <div class="flex gap-3 pt-2">
-      <button
-        type="submit"
-        class="px-5 py-2 text-sm font-medium text-white rounded transition"
-        style="background-color: #f97316"
-      >
-        Record Pickup
-      </button>
-      <a
-        href="{% url 'scheme:customer-detail' customer.pk %}"
-        class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition"
-      >
-        Cancel
-      </a>
-    </div>
-  </form>
+        <div class="flex gap-3 pt-2">
+            <button type="submit" id="submit-btn"
+                    class="px-5 py-2 text-sm font-medium text-white rounded transition"
+                    style="background-color: #f97316;">
+                Record Pickup
+            </button>
+            <a href="{% url 'scheme:customer-detail' customer.pk %}"
+               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition">
+                Cancel
+            </a>
+        </div>
+    </form>
 </div>
-<script>
-  document
-    .querySelector('[name="product"]')
-    .addEventListener("change", function () {
-      var select = this;
-      var option = select.options[select.selectedIndex];
-      var price = option.getAttribute("data-price");
-      if (price) {
-        document.querySelector('[name="unit_price"]').value = price;
-      }
-    });
-</script>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var balance = parseFloat("{{ balance }}");
+
+    document.getElementById('product-select').addEventListener('change', function() {
+        var option = this.options[this.selectedIndex];
+        var price  = option.getAttribute('data-price') || 0;
+        document.getElementById('unit-price-input').value = price;
+        updateTotal();
+    });
+
+    document.getElementById('quantity-input').addEventListener('input', function() {
+        updateTotal();
+    });
+
+    function updateTotal() {
+        var qty   = parseFloat(document.getElementById('quantity-input').value) || 0;
+        var price = parseFloat(document.getElementById('unit-price-input').value) || 0;
+        var total = qty * price;
+
+        document.getElementById('total-value').textContent = 'UGX ' + total.toLocaleString();
+
+        var warning = document.getElementById('balance-warning');
+        var btn     = document.getElementById('submit-btn');
+
+        if (total > balance) {
+            warning.classList.remove('hidden');
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+        } else {
+            warning.classList.add('hidden');
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+    }
+</script>
 {% endblock %}

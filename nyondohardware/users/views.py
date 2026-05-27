@@ -1,33 +1,28 @@
-from django.shortcuts import render
-
-# Create your views here.
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout, update_session_auth_hash
+from django.contrib.auth import login, logout, update_session_auth_hash, authenticate
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import UserProfile
-from .forms import UserRegistrationForm, UserEditForm, CustomPasswordChangeForm
+from .forms import UserRegistrationForm, UserEditForm, CustomPasswordChangeForm, ProfileUpdateForm
 from .decorators import admin_required, sales_required
 
 
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard:home')
-    
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        
-        from django.contrib.auth import authenticate
-        user = authenticate(request, username=username, password=password)
-        
+        user     = authenticate(request, username=username, password=password)
+
         if user is not None:
             login(request, user)
             messages.success(request, f'Welcome back, {user.get_full_name()}!')
             return redirect('dashboard:home')
         else:
             messages.error(request, 'Invalid username or password.')
-    
+
     return render(request, 'users/login.html')
 
 
@@ -42,7 +37,7 @@ def register_view(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
+            user            = form.save(commit=False)
             user.first_name = form.cleaned_data['first_name']
             user.last_name  = form.cleaned_data['last_name']
             user.email      = form.cleaned_data['email']
@@ -54,7 +49,6 @@ def register_view(request):
             return redirect('users:user-list')
     else:
         form = UserRegistrationForm()
-    
     return render(request, 'users/register.html', {'form': form})
 
 
@@ -72,7 +66,7 @@ def user_detail_view(request, pk):
 
 @admin_required
 def user_edit_view(request, pk):
-    user = get_object_or_404(User, pk=pk)
+    user    = get_object_or_404(User, pk=pk)
     profile = user.userprofile
 
     if request.method == 'POST':
@@ -92,7 +86,10 @@ def user_edit_view(request, pk):
             'email'     : user.email,
         })
 
-    return render(request, 'users/user_edit_form.html', {'form': form, 'user': user})
+    return render(request, 'users/user_edit_form.html', {
+        'form': form,
+        'user': user,
+    })
 
 
 @admin_required
@@ -121,12 +118,39 @@ def user_delete_view(request, pk):
 @sales_required
 def profile_view(request):
     if request.method == 'POST':
-        form = CustomPasswordChangeForm(request.user, request.POST)
-        if form.is_valid():
-            user = form.save()
-            update_session_auth_hash(request, user)
-            messages.success(request, 'Password changed successfully.')
-            return redirect('users:profile')
+        profile_form  = ProfileUpdateForm(
+            request.POST,
+            request.FILES,
+            instance=request.user.userprofile
+        )
+        password_form = CustomPasswordChangeForm(request.user, request.POST)
+
+        if 'update_profile' in request.POST:
+            if profile_form.is_valid():
+                request.user.first_name = profile_form.cleaned_data['first_name']
+                request.user.last_name  = profile_form.cleaned_data['last_name']
+                request.user.save()
+                profile_form.save()
+                messages.success(request, 'Profile updated successfully.')
+                return redirect('users:profile')
+
+        elif 'change_password' in request.POST:
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Password changed successfully.')
+                return redirect('users:profile')
     else:
-        form = CustomPasswordChangeForm(request.user)
-    return render(request, 'users/profile.html', {'form': form})
+        profile_form  = ProfileUpdateForm(
+            instance=request.user.userprofile,
+            initial={
+                'first_name': request.user.first_name,
+                'last_name' : request.user.last_name,
+            }
+        )
+        password_form = CustomPasswordChangeForm(request.user)
+
+    return render(request, 'users/profile.html', {
+        'profile_form' : profile_form,
+        'password_form': password_form,
+    })

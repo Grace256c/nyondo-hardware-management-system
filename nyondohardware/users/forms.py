@@ -51,3 +51,25 @@ class UserEditForm(forms.ModelForm):
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     pass
+
+class ProfileUpdateForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=50, required=True)
+    last_name  = forms.CharField(max_length=50, required=True)
+
+    class Meta:
+        model  = UserProfile
+        fields = ['phone', 'avatar']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': 'w-full border border-gray-300 rounded px-3 py-2 text-sm'
+            })
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        import re
+        if not re.match(r'^(\+?256|0)[7][0-9]{8}$', phone):
+            raise forms.ValidationError('Enter a valid Ugandan phone number.')
+        return phone
