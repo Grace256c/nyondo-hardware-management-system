@@ -12,19 +12,38 @@ def login_view(request):
         return redirect('dashboard:home')
 
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user     = authenticate(request, username=username, password=password)
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        # Backend validation
+        if not username:
+            messages.error(request, 'Username is required.')
+            return render(request, 'users/login.html')
+
+        if not password:
+            messages.error(request, 'Password is required.')
+            return render(request, 'users/login.html')
+
+        if len(username) < 3:
+            messages.error(request, 'Username must be at least 3 characters.')
+            return render(request, 'users/login.html')
+
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
+            if not user.is_active:
+                messages.error(request, 'Your account has been deactivated. Contact the admin.')
+                return render(request, 'users/login.html')
+            if not user.userprofile.is_active:
+                messages.error(request, 'Your account has been deactivated. Contact the admin.')
+                return render(request, 'users/login.html')
             login(request, user)
-            messages.success(request, f'Welcome back, {user.get_full_name()}!')
+            messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
             return redirect('dashboard:home')
         else:
-            messages.error(request, 'Invalid username or password.')
+            messages.error(request, 'Invalid username or password. Please try again.')
 
     return render(request, 'users/login.html')
-
 
 def logout_view(request):
     logout(request)

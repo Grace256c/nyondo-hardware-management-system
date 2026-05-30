@@ -1,4 +1,4 @@
-{% load static %}
+{%load static%}
 <!doctype html>
 <html lang="en">
   <head>
@@ -6,13 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login — Nyondo Hardware</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <style>
+      * {
+        font-family: "Inter", sans-serif;
+      }
+    </style>
   </head>
   <body
     style="background-color: #0a1f44"
-    class="min-h-screen flex items-center justify-center"
+    class="min-h-screen flex items-center justify-center p-4"
   >
     <div class="w-full max-w-md">
-      <!-- LOGO CARD -->
+      <!-- LOGO -->
       <div class="text-center mb-8">
         <div class="flex items-center justify-center mx-auto mb-4">
           <img
@@ -20,62 +30,160 @@
             alt="Logo"
             class="w-40 md:w-48 h-auto object-contain"
           />
-        <!-- <h1 class="text-gray-400 text-sm mt-1">Sign in to your account</h1> -->
-      </div>
+        </div>
+
+        <h1 class="text-white text-2xl font-bold">Nyondo Hardware</h1>
+
+        <p class="text-gray-400 text-sm mt-1">Sign in to your account</p>
       </div>
 
-      <!-- LOGIN FORM -->
-      <div class="bg-white rounded-xl shadow-lg px-8 py-8">
+      <!-- FORM CARD -->
+      <div class="bg-white rounded-2xl shadow-2xl px-8 py-8">
+        <h2 class="text-lg font-semibold text-gray-800 mb-1">Sign in</h2>
+        <p class="text-sm text-gray-500 mb-6">
+          Enter your credentials to continue
+        </p>
+
         {% if messages %} {% for message in messages %}
         <div
-          class="mb-4 px-4 py-3 rounded text-sm font-medium {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200 {% else %}bg-green-50 text-green-700 border border-green-200{% endif %}"
+          class="mb-4 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200 {% else %}bg-green-50 text-green-700 border border-green-200{% endif %}"
         >
+          <i
+            data-lucide="{% if message.tags == 'error' %}alert-circle{% else %}check-circle{% endif %}"
+            class="w-4 h-4 shrink-0"
+          ></i>
           {{ message }}
         </div>
         {% endfor %} {% endif %}
 
-        <form method="POST" class="space-y-5">
+        <form method="POST" novalidate class="space-y-5" id="login-form">
           {% csrf_token %}
 
+          <!-- USERNAME -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
-              Username
+              Username <span class="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              name="username"
-              required
-              class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
-              placeholder="Enter your username"
-            />
+            <div class="relative">
+              <div
+                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+              >
+                <i data-lucide="user" class="w-4 h-4 text-gray-400"></i>
+              </div>
+              <input
+                type="text"
+                name="username"
+                id="username"
+                autocomplete="username"
+                class="w-full border rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
+                id="username-input"
+                placeholder="Enter your username"
+              />
+            </div>
+            <p class="text-red-500 text-xs mt-1 hidden" id="username-error">
+              Username is required.
+            </p>
           </div>
 
+          <!-- PASSWORD -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
-              Password
+              Password <span class="text-red-500">*</span>
             </label>
-            <input
-              type="password"
-              name="password"
-              required
-              class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
-              placeholder="Enter your password"
-            />
+            <div class="relative">
+              <div
+                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+              >
+                <i data-lucide="lock" class="w-4 h-4 text-gray-400"></i>
+              </div>
+              <input
+                type="password"
+                name="password"
+                id="password-input"
+                autocomplete="current-password"
+                class="w-full border rounded-lg pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onclick="togglePassword()"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                <i data-lucide="eye" class="w-4 h-4" id="eye-icon"></i>
+              </button>
+            </div>
+            <p class="text-red-500 text-xs mt-1 hidden" id="password-error">
+              Password is required.
+            </p>
           </div>
 
+          <!-- SUBMIT -->
           <button
             type="submit"
-            class="w-full py-2 text-sm font-medium text-white rounded transition"
+            id="login-btn"
+            class="w-full py-2.5 text-sm font-semibold text-white rounded-lg transition flex items-center justify-center gap-2"
             style="background-color: #f97316"
           >
+            <i data-lucide="log-in" class="w-4 h-4"></i>
             Sign In
           </button>
         </form>
       </div>
 
       <p class="text-center text-gray-500 text-xs mt-6">
-        &copy; 2026 Nyondo Hardware LTD — Nansana, Uganda
+        &copy; 2026 Nyondo Hardware LTD &mdash; Nansana, Uganda
+      </p>
+      <p class="text-center text-xs mt-1">
+        <a
+          href="https://gracetechsolutions.netlify.app/"
+          target="_blank"
+          class="hover:underline"
+          style="color: #f97316"
+        >
+          Grace Tech Solutions
+        </a>
       </p>
     </div>
+
+    <script>
+      lucide.createIcons();
+
+      // Frontend validation
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", function (e) {
+          var valid = true;
+          var username = document.getElementById("username-input").value.trim();
+          var password = document.getElementById("password-input").value.trim();
+          var unErr = document.getElementById("username-error");
+          var pwErr = document.getElementById("password-error");
+
+          unErr.classList.add("hidden");
+          pwErr.classList.add("hidden");
+
+          if (!username) {
+            unErr.classList.remove("hidden");
+            valid = false;
+          }
+          if (!password) {
+            pwErr.classList.remove("hidden");
+            valid = false;
+          }
+          if (!valid) e.preventDefault();
+        });
+
+      function togglePassword() {
+        var input = document.getElementById("password-input");
+        var icon = document.getElementById("eye-icon");
+        if (input.type === "password") {
+          input.type = "text";
+          icon.setAttribute("data-lucide", "eye-off");
+        } else {
+          input.type = "password";
+          icon.setAttribute("data-lucide", "eye");
+        }
+        lucide.createIcons();
+      }
+    </script>
   </body>
 </html>
