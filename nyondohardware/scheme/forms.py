@@ -68,19 +68,37 @@ class SchemeCustomerRegistrationForm(forms.ModelForm):
             )
         return name
 
+    class SchemeCustomerRegistrationForm(forms.ModelForm):
+
+     def clean_full_name(self):
+        name = self.cleaned_data.get('full_name')
+        return name
+
     def clean_nin(self):
-        nin = self.cleaned_data.get('nin', '').strip().upper()
+        nin = self.cleaned_data.get('nin')
+
         if not nin:
             raise forms.ValidationError('NIN is required.')
-        if not re.match(r'^[A-Z0-9]{14}$', nin):
+
+        import re
+
+        nin = nin.upper().strip()
+
+        if not re.match(r'^[CFM]\d{8}[A-Z]{4}$', nin):
             raise forms.ValidationError(
-                'NIN must be exactly 14 uppercase letters and numbers. '
-                'Example: CM12345678901A'
+                'Invalid NIN format. '
+                'Must be CF (female) or CM (male) '
+                'followed by 8 digits and 4 letters. '
+                'Example: CF00026108VGQL or CM00026108GVQL'
             )
-        if SchemeCustomer.objects.filter(nin=nin).exclude(pk=self.instance.pk).exists():
+
+        if SchemeCustomer.objects.filter(nin=nin).exclude(
+            pk=self.instance.pk
+        ).exists():
             raise forms.ValidationError(
-                'A customer with this NIN is already registered.'
+                'This NIN is already registered.'
             )
+
         return nin
 
     def clean_phone(self):

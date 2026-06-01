@@ -14,57 +14,58 @@
     </p>
 </div>
 
-<div class="bg-white rounded shadow-sm border border-gray-200 max-w-lg">
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 form-card">
     <div class="px-6 py-4 border-b border-gray-100">
         <h2 class="text-sm font-semibold text-gray-700">Customer Details</h2>
-        <p class="text-xs text-gray-400 mt-1">
-            Full name and NIN must match the national ID exactly.
-        </p>
+        <p class="text-xs text-gray-400 mt-1">Full name and NIN must match the national ID exactly.</p>
     </div>
     <form method="POST" class="px-6 py-5 space-y-4">
         {% csrf_token %}
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Full Name <span class="text-red-500">*</span>
-            </label>
-            {{ form.full_name }}
-            <p class="text-xs text-gray-400 mt-1">Must match name on National ID</p>
-            {% if form.full_name.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.full_name.errors.0 }}</p>
-            {% endif %}
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name <span class="text-red-500">*</span>
+                </label>
+                {{ form.full_name }}
+                <p class="text-xs text-gray-400 mt-1">Enter both first and last name as on National ID</p>
+                {% if form.full_name.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.full_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    NIN <span class="text-red-500">*</span>
+                </label>
+                {{ form.nin }}
+                <p class="text-xs text-gray-400 mt-1">
+                    Female: CF + 8 digits + 4 letters e.g. CF00026108GVQL<br>
+                    Male: CM + 8 digits + 4 letters e.g. CM00026108GVQL
+                </p>
+                {% if form.nin.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.nin.errors.0 }}</p>
+                {% endif %}
+            </div>
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                NIN <span class="text-red-500">*</span>
-            </label>
-            {{ form.nin }}
-            <p class="text-xs text-gray-400 mt-1">
-                14 uppercase letters and numbers e.g. CM123456789012
-            </p>
-            {% if form.nin.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.nin.errors.0 }}</p>
-            {% endif %}
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Phone <span class="text-red-500">*</span>
-            </label>
-            {{ form.phone }}
-            <p class="text-xs text-gray-400 mt-1">Format: 07XXXXXXXX or +25677XXXXXXX</p>
-            {% if form.phone.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.phone.errors.0 }}</p>
-            {% endif %}
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Employer</label>
-            {{ form.employer }}
-            {% if form.employer.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.employer.errors.0 }}</p>
-            {% endif %}
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Phone <span class="text-red-500">*</span>
+                </label>
+                {{ form.phone }}
+                <p class="text-xs text-gray-400 mt-1">Format: 07XXXXXXXX or +25677XXXXXXX</p>
+                {% if form.phone.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.phone.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Employer</label>
+                {{ form.employer }}
+                {% if form.employer.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.employer.errors.0 }}</p>
+                {% endif %}
+            </div>
         </div>
 
         <div>
@@ -83,12 +84,12 @@
 
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                    class="px-5 py-2 text-sm font-medium text-white rounded transition"
+                    class="px-5 py-2 text-sm font-medium text-white rounded-lg transition"
                     style="background-color: #f97316;">
-                Register
+                Register Customer
             </button>
             <a href="{% url 'scheme:customer-list' %}"
-               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition">
+               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
                 Cancel
             </a>
         </div>

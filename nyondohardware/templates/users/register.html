@@ -14,10 +14,10 @@
     </p>
 </div>
 
-<div class="bg-white rounded shadow-sm border border-gray-200 max-w-lg">
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 form-card">
     <div class="px-6 py-4 border-b border-gray-100">
         <h2 class="text-sm font-semibold text-gray-700">User Details</h2>
-        <p class="text-xs text-gray-400 mt-1">Admin only. New user will be able to login immediately.</p>
+        <p class="text-xs text-gray-400 mt-1">Admin only. New user can log in immediately after registration.</p>
     </div>
     <form method="POST" class="px-6 py-5 space-y-4">
         {% csrf_token %}
@@ -43,65 +43,66 @@
             </div>
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Username <span class="text-red-500">*</span>
-            </label>
-            {{ form.username }}
-            {% if form.username.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.username.errors.0 }}</p>
-            {% endif %}
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Username <span class="text-red-500">*</span>
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.username.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Email
-            </label>
-            {{ form.email }}
-            {% if form.email.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>
-            {% endif %}
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Phone <span class="text-red-500">*</span>
+                </label>
+                {{ form.phone }}
+                <p class="text-xs text-gray-400 mt-1">Format: 07XXXXXXXX</p>
+                {% if form.phone.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.phone.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Role <span class="text-red-500">*</span>
+                </label>
+                {{ form.role }}
+                {% if form.role.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.role.errors.0 }}</p>
+                {% endif %}
+            </div>
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Phone <span class="text-red-500">*</span>
-            </label>
-            {{ form.phone }}
-            <p class="text-xs text-gray-400 mt-1">Format: 07XXXXXXXX or +25677XXXXXXX</p>
-            {% if form.phone.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.phone.errors.0 }}</p>
-            {% endif %}
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Role <span class="text-red-500">*</span>
-            </label>
-            {{ form.role }}
-            {% if form.role.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.role.errors.0 }}</p>
-            {% endif %}
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Password <span class="text-red-500">*</span>
-            </label>
-            {{ form.password1 }}
-            {% if form.password1.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.password1.errors.0 }}</p>
-            {% endif %}
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password <span class="text-red-500">*</span>
-            </label>
-            {{ form.password2 }}
-            {% if form.password2.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.password2.errors.0 }}</p>
-            {% endif %}
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Password <span class="text-red-500">*</span>
+                </label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.password1.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Confirm Password <span class="text-red-500">*</span>
+                </label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.password2.errors.0 }}</p>
+                {% endif %}
+            </div>
         </div>
 
         {% if form.non_field_errors %}
@@ -112,12 +113,12 @@
 
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                    class="px-5 py-2 text-sm font-medium text-white rounded transition"
+                    class="px-5 py-2 text-sm font-medium text-white rounded-lg transition"
                     style="background-color: #f97316;">
                 Register User
             </button>
             <a href="{% url 'users:user-list' %}"
-               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition">
+               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
                 Cancel
             </a>
         </div>
