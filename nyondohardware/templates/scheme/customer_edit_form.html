@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div class="mb-6">
+<div class="page-header">
     <h1 class="text-2xl font-bold" style="color: #0a1f44;">Edit Customer</h1>
     <p class="text-sm text-gray-500 mt-1">
         <a href="{% url 'scheme:customer-list' %}" class="hover:underline" style="color: #f97316;">
@@ -18,43 +18,45 @@
     </p>
 </div>
 
-<div class="bg-white rounded shadow-sm border border-gray-200 max-w-lg">
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 form-card">
     <div class="px-6 py-4 border-b border-gray-100">
         <h2 class="text-sm font-semibold text-gray-700">Update Details</h2>
         <p class="text-xs text-gray-400 mt-1">Full name and NIN cannot be changed.</p>
     </div>
 
-    <!-- READ ONLY INFO -->
-    <div class="px-6 py-4 bg-gray-50 border-b border-gray-100 text-sm space-y-2">
-        <div class="flex justify-between">
-            <span class="text-gray-500">Full Name</span>
-            <span class="font-medium text-gray-800">{{ customer.full_name }}</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-500">NIN</span>
-            <span class="font-medium text-gray-800">{{ customer.nin }}</span>
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-100 text-sm">
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex justify-between">
+                <span class="text-gray-500">Full Name</span>
+                <span class="font-medium text-gray-800">{{ customer.full_name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">NIN</span>
+                <span class="font-medium text-gray-800">{{ customer.nin }}</span>
+            </div>
         </div>
     </div>
 
     <form method="POST" class="px-6 py-5 space-y-4">
         {% csrf_token %}
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Phone <span class="text-red-500">*</span>
-            </label>
-            {{ form.phone }}
-            {% if form.phone.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.phone.errors.0 }}</p>
-            {% endif %}
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Employer</label>
-            {{ form.employer }}
-            {% if form.employer.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.employer.errors.0 }}</p>
-            {% endif %}
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Phone <span class="text-red-500">*</span>
+                </label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.phone.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Employer</label>
+                {{ form.employer }}
+                {% if form.employer.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.employer.errors.0 }}</p>
+                {% endif %}
+            </div>
         </div>
 
         <div>
@@ -67,12 +69,12 @@
 
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                    class="px-5 py-2 text-sm font-medium text-white rounded transition"
+                    class="px-5 py-2 text-sm font-medium text-white rounded-lg transition"
                     style="background-color: #f97316;">
                 Save
             </button>
             <a href="{% url 'scheme:customer-detail' customer.pk %}"
-               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition">
+               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
                 Cancel
             </a>
         </div>

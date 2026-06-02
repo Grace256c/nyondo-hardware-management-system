@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div class="mb-6">
+<div class="page-header">
     <h1 class="text-2xl font-bold" style="color: #0a1f44;">Record Deposit</h1>
     <p class="text-sm text-gray-500 mt-1">
         <a href="{% url 'scheme:customer-list' %}" class="hover:underline" style="color: #f97316;">
@@ -19,8 +19,6 @@
 </div>
 
 <div class="form-card space-y-4">
-
-    <!-- BALANCE CARD -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4 flex items-center justify-between">
         <div>
             <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Current Balance</p>
@@ -33,7 +31,6 @@
         </div>
     </div>
 
-    <!-- FORM -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-100">
             <h2 class="text-sm font-semibold text-gray-700">Deposit Details</h2>

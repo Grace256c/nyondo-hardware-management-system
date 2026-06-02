@@ -4,24 +4,26 @@
 
 {% block content %}
 
-<div class="mb-6">
+<div class="page-header">
     <h1 class="text-2xl font-bold" style="color: #0a1f44;">{{ title }}</h1>
     <p class="text-sm text-gray-500 mt-1">
         <a href="{% url 'stock:receipt-list' %}" class="hover:underline" style="color: #f97316;">
-            Stock Receipts
+            GRN List
         </a>
         &rsaquo; {{ title }}
     </p>
 </div>
 
-<div class="bg-white rounded shadow-sm border border-gray-200 max-w-2xl">
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 form-card">
     <div class="px-6 py-4 border-b border-gray-100">
-        <h2 class="text-sm font-semibold text-gray-700">Receipt Details</h2>
+        <h2 class="text-sm font-semibold text-gray-700">Stock Receipt Details</h2>
+        <p class="text-xs text-gray-400 mt-1">
+            A GRN number will be automatically generated on save.
+        </p>
     </div>
     <form method="POST" class="px-6 py-5 space-y-4">
         {% csrf_token %}
 
-        <!-- SUPPLIER AND PRODUCT -->
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -43,8 +45,7 @@
             </div>
         </div>
 
-        <!-- QUANTITY AND UNIT COST -->
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
                     Quantity <span class="text-red-500">*</span>
@@ -63,19 +64,6 @@
                     <p class="text-red-500 text-xs mt-1">{{ form.unit_cost.errors.0 }}</p>
                 {% endif %}
             </div>
-        </div>
-
-        <!-- PAYMENT STATUS AND DATE -->
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Payment Status <span class="text-red-500">*</span>
-                </label>
-                {{ form.payment_status }}
-                {% if form.payment_status.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ form.payment_status.errors.0 }}</p>
-                {% endif %}
-            </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
                     Receipt Date <span class="text-red-500">*</span>
@@ -87,15 +75,26 @@
             </div>
         </div>
 
-        <!-- NOTES -->
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Notes
-            </label>
-            {{ form.notes }}
-            {% if form.notes.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.notes.errors.0 }}</p>
-            {% endif %}
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Payment Status <span class="text-red-500">*</span>
+                </label>
+                {{ form.payment_status }}
+                <p class="text-xs text-gray-400 mt-1">
+                    Select Credit if supplier payment is pending
+                </p>
+                {% if form.payment_status.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.payment_status.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.notes.errors.0 }}</p>
+                {% endif %}
+            </div>
         </div>
 
         {% if form.non_field_errors %}
@@ -106,12 +105,12 @@
 
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                    class="px-5 py-2 text-sm font-medium text-white rounded transition"
+                    class="px-5 py-2 text-sm font-medium text-white rounded-lg transition"
                     style="background-color: #f97316;">
                 Save Receipt
             </button>
             <a href="{% url 'stock:receipt-list' %}"
-               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition">
+               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
                 Cancel
             </a>
         </div>

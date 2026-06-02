@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div class="mb-6">
+<div class="page-header">
     <h1 class="text-2xl font-bold" style="color: #0a1f44;">{{ title }}</h1>
     <p class="text-sm text-gray-500 mt-1">
         <a href="{% url 'stock:product-list' %}" class="hover:underline" style="color: #f97316;">
@@ -14,18 +14,20 @@
     </p>
 </div>
 
-<div class="bg-white rounded shadow-sm border border-gray-200 max-w-2xl">
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 form-card">
     <div class="px-6 py-4 border-b border-gray-100">
         <h2 class="text-sm font-semibold text-gray-700">Product Details</h2>
+        <p class="text-xs text-gray-400 mt-1">
+            Include specifications in the name e.g. "Cement CEM IIN", "Iron Bar 10mm"
+        </p>
     </div>
     <form method="POST" class="px-6 py-5 space-y-4">
         {% csrf_token %}
 
-        <!-- NAME AND CATEGORY -->
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Name <span class="text-red-500">*</span>
+                    Product Name <span class="text-red-500">*</span>
                 </label>
                 {{ form.name }}
                 {% if form.name.errors %}
@@ -43,7 +45,6 @@
             </div>
         </div>
 
-        <!-- UNIT AND REORDER LEVEL -->
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -59,17 +60,19 @@
                     Reorder Level <span class="text-red-500">*</span>
                 </label>
                 {{ form.reorder_level }}
+                <p class="text-xs text-gray-400 mt-1">
+                    Alert when stock falls below this level
+                </p>
                 {% if form.reorder_level.errors %}
                     <p class="text-red-500 text-xs mt-1">{{ form.reorder_level.errors.0 }}</p>
                 {% endif %}
             </div>
         </div>
 
-        <!-- PRICES -->
         <div class="grid grid-cols-3 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Cost Price <span class="text-red-500">*</span>
+                    Cost Price (UGX) <span class="text-red-500">*</span>
                 </label>
                 {{ form.cost_price }}
                 {% if form.cost_price.errors %}
@@ -78,7 +81,7 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Retail Price <span class="text-red-500">*</span>
+                    Retail Price (UGX) <span class="text-red-500">*</span>
                 </label>
                 {{ form.retail_price }}
                 {% if form.retail_price.errors %}
@@ -87,24 +90,13 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Wholesale Price <span class="text-red-500">*</span>
+                    Wholesale Price (UGX) <span class="text-red-500">*</span>
                 </label>
                 {{ form.wholesale_price }}
                 {% if form.wholesale_price.errors %}
                     <p class="text-red-500 text-xs mt-1">{{ form.wholesale_price.errors.0 }}</p>
                 {% endif %}
             </div>
-        </div>
-
-        <!-- DESCRIPTION -->
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Description
-            </label>
-            {{ form.description }}
-            {% if form.description.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ form.description.errors.0 }}</p>
-            {% endif %}
         </div>
 
         {% if form.non_field_errors %}
@@ -115,12 +107,12 @@
 
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                    class="px-5 py-2 text-sm font-medium text-white rounded transition"
+                    class="px-5 py-2 text-sm font-medium text-white rounded-lg transition"
                     style="background-color: #f97316;">
-                Save
+                Save Product
             </button>
             <a href="{% url 'stock:product-list' %}"
-               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition">
+               class="px-5 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
                 Cancel
             </a>
         </div>

@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div class="mb-6">
+<div class="page-header">
     <h1 class="text-2xl font-bold" style="color: #0a1f44;">Register New User</h1>
     <p class="text-sm text-gray-500 mt-1">
         <a href="{% url 'users:user-list' %}" class="hover:underline" style="color: #f97316;">
@@ -17,7 +17,9 @@
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 form-card">
     <div class="px-6 py-4 border-b border-gray-100">
         <h2 class="text-sm font-semibold text-gray-700">User Details</h2>
-        <p class="text-xs text-gray-400 mt-1">Admin only. New user can log in immediately after registration.</p>
+        <p class="text-xs text-gray-400 mt-1">
+            Admin only. New user can log in immediately after registration.
+        </p>
     </div>
     <form method="POST" class="px-6 py-5 space-y-4">
         {% csrf_token %}
